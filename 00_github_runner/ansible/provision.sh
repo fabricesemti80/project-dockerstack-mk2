@@ -14,13 +14,17 @@ if [ -z "$IP" ]; then
 fi
 
 # Create temp private key from Doppler secret
-if [ -z "$SSH_PRIVATE_KEY" ]; then
-  echo "Error: SSH_PRIVATE_KEY secret is missing in Doppler."
+if [ -z "$ANSIBLE_SSH_PRIVATE_KEY" ]; then
+  echo "Error: ANSIBLE_SSH_PRIVATE_KEY secret is missing in Doppler."
+  exit 1
+fi
+if [ -z "$ANSIBLE_SSH_USER" ]; then
+  echo "Error: ANSIBLE_SSH_USER secret is missing in Doppler."
   exit 1
 fi
 
 KEY_FILE=$(mktemp)
-echo "$SSH_PRIVATE_KEY" > "$KEY_FILE"
+echo "$ANSIBLE_SSH_PRIVATE_KEY" > "$KEY_FILE"
 chmod 600 "$KEY_FILE"
 trap "rm -f $KEY_FILE" EXIT
 
@@ -29,8 +33,8 @@ echo "Provisioning runner at $IP..."
 # Wait for SSH to be fully ready
 count=0
 retries=30
-echo "Waiting for SSH connection to fs@$IP..."
-until ssh -i "$KEY_FILE" -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null fs@$IP exit 0 2>/dev/null; do
+echo "Waiting for SSH connection to $ANSIBLE_SSH_USER@$IP..."
+until ssh -i "$KEY_FILE" -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $ANSIBLE_SSH_USER@$IP exit 0 2>/dev/null; do
   count=$((count+1))
   if [ $count -ge $retries ]; then
     echo "Timeout waiting for SSH access to $IP. Verify SSH keys and network."
@@ -41,7 +45,7 @@ until ssh -i "$KEY_FILE" -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyCh
 done
 
 # Run Ansible
-ansible-playbook -i "$IP," playbook.yml --private-key "$KEY_FILE" -e "github_url=$GITHUB_URL" -e "github_token=$GITHUB_TOKEN"
+ansible-playbook -i "$IP," playbook.yml --private-key "$KEY_FILE" -u "$ANSIBLE_SSH_USER" -e "github_url=$GITHUB_URL" -e "github_token=$GITHUB_TOKEN"
 
 echo "Waiting for runner to reboot and come online..."
 sleep 45
@@ -50,11 +54,11 @@ sleep 45
 count=0
 retries=20
 echo "Verifying runner service status..."
-until ssh -i "$KEY_FILE" -o ConnectTimeout=5 -o StrictHostKeyChecking=no fs@$IP "sudo systemctl is-active --quiet actions.runner.*"; do
+until ssh -i "$KEY_FILE" -o ConnectTimeout=5 -o StrictHostKeyChecking=no $ANSIBLE_SSH_USER@$IP "sudo systemctl is-active --quiet actions.runner.*"; do
   count=$((count+1))
   if [ $count -ge $retries ]; then
     echo "Runner service failed to start or is not active."
-    ssh -i "$KEY_FILE" -o StrictHostKeyChecking=no fs@$IP "sudo systemctl status actions.runner.*" || true
+    ssh -i "$KEY_FILE" -o StrictHostKeyChecking=no $ANSIBLE_SSH_USER@$IP "sudo systemctl status actions.runner.*" || true
     exit 1
   fi
   echo "Waiting for service to be active... ($count/$retries)"

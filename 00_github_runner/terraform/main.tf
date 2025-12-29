@@ -51,6 +51,7 @@ resource "proxmox_virtual_environment_vm" "runner" {
   lifecycle {
     ignore_changes = [
       initialization,
+      clone
     ]
   }
 }

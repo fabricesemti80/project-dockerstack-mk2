@@ -9,8 +9,14 @@ if [ -z "$TF_VAR_SSH_PUBLIC_KEYS" ]; then
     exit 1
 fi
 
+if [ -z "$ANSIBLE_SSH_USER" ]; then
+    echo "Error: ANSIBLE_SSH_USER is not set."
+    exit 1
+fi
+
 cat <<EOF > .proxmox.tfvars.json
 {
-  "ssh_public_keys": $TF_VAR_SSH_PUBLIC_KEYS
+  "ssh_public_keys": $TF_VAR_SSH_PUBLIC_KEYS,
+  "ci_user": "$ANSIBLE_SSH_USER"
 }
 EOF

@@ -42,5 +42,4 @@ variable "ssh_public_keys" {
 variable "ci_user" {
   description = "The username to create on the VM"
   type        = string
-  default     = "fs"
 }
