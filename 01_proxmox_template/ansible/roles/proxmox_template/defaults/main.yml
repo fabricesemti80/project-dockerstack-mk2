@@ -1,0 +1,24 @@
+---
+# defaults file for proxmox_template
+
+# VM Configuration
+vm_id: 9008
+vm_name: "debian-13-cloudinit-template"
+storage: "vm-storage"
+memory: 1024
+cores: 1
+disk_size: "32G"
+network_bridge: "vmbr0"
+
+# Image Configuration
+image_url: "https://cloud.debian.org/images/cloud/trixie/daily/latest/debian-13-generic-amd64-daily.qcow2"
+image_name: "debian-13-generic-amd64.qcow2"
+download_path: "/tmp/{{ image_name }}"
+
+# Cloud-Init Configuration
+cloud_init_user: "{{ lookup('env', 'ANSIBLE_SSH_USER') | default('fs', true) }}"
+# Default password, should be overridden by env var
+cloud_init_password: "{{ lookup('env', 'TEMPLATE_PASSWORD') | default('changeme', true) }}"
+
+# SSH Keys (JSON string parsing)
+ssh_public_keys: "{{ lookup('env', 'TF_VAR_SSH_PUBLIC_KEYS') | from_json }}"

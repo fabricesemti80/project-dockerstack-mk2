@@ -1,0 +1,6 @@
+---
+- name: Create Proxmox Debian 13 Template
+  hosts: all
+  gather_facts: no
+  roles:
+    - proxmox_template

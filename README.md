@@ -25,8 +25,9 @@ This directory contains the automation to provision the bootstrap runner.
 *   **[Setup Guide](00_github_runner/SETUP.md):** Instructions for setting up secrets and running the initial provision.
 *   **Tools:** Terraform (VM creation) + Ansible (Software installation).
 
-### 2. VM Templates (*Upcoming*)
-*   Automated Debian/Ubuntu template generation on Proxmox.
+### 2. VM Templates (`01_proxmox_template/`)
+*   Automated Debian 13 template generation on Proxmox.
+*   **[Setup Guide](01_proxmox_template/SETUP.md):** Instructions for template creation.
 
 ### 3. Infrastructure (*Upcoming*)
 *   Terraform modules for Proxmox and Hetzner resources.

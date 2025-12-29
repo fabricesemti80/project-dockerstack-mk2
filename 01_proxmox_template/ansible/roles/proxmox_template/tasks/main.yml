@@ -1,0 +1,87 @@
+---
+# tasks file for proxmox_template
+
+- name: Install libguestfs-tools
+  apt:
+    name: libguestfs-tools
+    state: present
+    update_cache: yes
+
+- name: Check if VM already exists
+  shell: "qm list --full | awk 'NR>1 {print $1}'"
+  register: existing_vms
+  changed_when: false
+
+- name: Create and configure VM template if it does not exist
+  block:
+    - name: Download Debian 13 cloud image
+      get_url:
+        url: "{{ image_url }}"
+        dest: "{{ download_path }}"
+        mode: '0644'
+
+    - name: Install qemu-guest-agent in the image
+      command: "virt-customize -a {{ download_path }} --install qemu-guest-agent"
+      environment:
+        LIBGUESTFS_BACKEND: direct
+
+    - name: Resize the downloaded image
+      command: "qemu-img resize {{ download_path }} {{ disk_size }}"
+
+    - name: Create a new virtual machine
+      command: >-
+        qm create {{ vm_id }} --name "{{ vm_name }}" --ostype l26
+        --memory {{ memory }} --agent 1 --bios ovmf --machine q35 --efidisk0 "{{ storage }}:0,pre-enrolled-keys=0"
+        --cpu host --socket 1 --cores {{ cores }} --vga serial0 --serial0 socket
+        --net0 virtio,bridge={{ network_bridge }}
+
+    - name: Attach the disk to the VM
+      command: "qm set {{ vm_id }} --scsihw virtio-scsi-pci --virtio0 {{ storage }}:0,import-from={{ download_path }}"
+
+    - name: Set boot order
+      command: "qm set {{ vm_id }} --boot order=virtio0"
+
+    - name: Add cloud-init drive
+      command: "qm set {{ vm_id }} --ide2 \"{{ storage }}:cloudinit\""
+
+    - name: Set cloud-init user and password
+      shell: "qm set {{ vm_id }} --ciuser {{ cloud_init_user }} --cipassword $(openssl passwd -6 '{{ cloud_init_password }}')"
+      no_log: true
+
+    - name: Configure SSH keys
+      block:
+        - name: Create a temporary file for SSH keys
+          tempfile:
+            state: file
+            suffix: temp
+          register: ssh_key_temp_file
+          check_mode: no
+
+        - name: Add SSH public keys to the temporary file
+          lineinfile:
+            path: "{{ ssh_key_temp_file.path }}"
+            line: "{{ item }}"
+          with_items: "{{ ssh_public_keys }}"
+          check_mode: no
+
+        - name: Configure SSH keys from temporary file
+          command: "qm set {{ vm_id }} --sshkeys {{ ssh_key_temp_file.path }}"
+
+      always:
+        - name: Remove temporary SSH key file
+          file:
+            path: "{{ ssh_key_temp_file.path }}"
+            state: absent
+          when: ssh_key_temp_file.path is defined
+
+    - name: Set IP configuration to DHCP
+      command: "qm set {{ vm_id }} --ipconfig0 ip=dhcp"
+
+    - name: Convert the VM to a template
+      command: "qm template {{ vm_id }}"
+
+    - name: Clean up downloaded image
+      file:
+        path: "{{ download_path }}"
+        state: absent
+  when: vm_id | string not in existing_vms.stdout_lines
