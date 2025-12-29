@@ -5,47 +5,55 @@ vars:
   ANSIBLE_DIR: ansible
 
 tasks:
+  default:
+    desc: List all tasks
+    cmds:
+      - task --list
+    silent: true
+
   init:
     desc: Initialize Terraform
     dir: '{{.TF_DIR}}'
-    cmd: doppler run -- terraform init
+    cmds:
+      - doppler run -- terraform init
 
   plan:
     desc: Plan Terraform changes
     dir: '{{.TF_DIR}}'
-    cmd: doppler run -- terraform plan
+    cmds:
+      - |
+        doppler run -- bash -c './generate_vars.sh && terraform plan -var-file=".proxmox.tfvars.json"; rm -f .proxmox.tfvars.json'
 
   apply:
     desc: Apply Terraform changes
     dir: '{{.TF_DIR}}'
-    cmd: doppler run -- terraform apply -auto-approve
+    cmds:
+      - |
+        doppler run -- bash -c './generate_vars.sh && terraform apply -var-file=".proxmox.tfvars.json" -auto-approve; rm -f .proxmox.tfvars.json'
 
   destroy:
     desc: Destroy Terraform resources
     dir: '{{.TF_DIR}}'
-    cmd: doppler run -- terraform destroy -auto-approve
+    cmds:
+      - |
+        doppler run -- bash -c './generate_vars.sh && terraform destroy -var-file=".proxmox.tfvars.json" -auto-approve; rm -f .proxmox.tfvars.json'
 
   output:
     desc: Show Terraform outputs
     dir: '{{.TF_DIR}}'
-    cmd: terraform output
+    cmds:
+      - terraform output
 
   provision:
-    desc: Provision the runner with Ansible
+    desc: Provision and verify the runner
     dir: '{{.ANSIBLE_DIR}}'
     cmds:
-      - |
-        IP=$(cd ../{{.TF_DIR}} && terraform output -raw vm_ipv4_address 2>/dev/null || echo "")
-        if [ -z "$IP" ]; then
-          echo "Could not get IP from Terraform output. Please provide IP=x.x.x.x"
-          exit 1
-        fi
-        echo "Provisioning runner at $IP..."
-        # Wait for SSH availability (simple loop)
-        while ! nc -z $IP 22; do   
-          echo "Waiting for SSH on $IP..."
-          sleep 5
-        done
-        doppler run -- ansible-playbook -i "$IP," playbook.yml -e "github_url=$GITHUB_URL" -e "github_token=$GITHUB_TOKEN"
-    vars:
-      IP: '{{.IP}}'
+      - chmod +x provision.sh
+      - doppler run -- ./provision.sh
+
+  status:
+    desc: Check the status of the runner service
+    dir: '{{.ANSIBLE_DIR}}'
+    cmds:
+      - chmod +x status.sh
+      - doppler run -- ./status.sh

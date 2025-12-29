@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_vm" "runner" {
   name      = var.vm_name
   node_name = var.node_name
-  vm_id     = var.vm_id
+  vm_id     = 4006
 
   clone {
     vm_id = var.template_vm_id
@@ -9,7 +9,7 @@ resource "proxmox_virtual_environment_vm" "runner" {
   }
 
   agent {
-    enabled = true
+    enabled = false
   }
 
   cpu {
@@ -34,9 +34,11 @@ resource "proxmox_virtual_environment_vm" "runner" {
   }
 
   initialization {
+    datastore_id = "vm-storage"
     ip_config {
       ipv4 {
-        address = "dhcp"
+        address = "10.0.40.6/24"
+        gateway = "10.0.40.1"
       }
     }
 
@@ -54,6 +56,5 @@ resource "proxmox_virtual_environment_vm" "runner" {
 }
 
 output "vm_ipv4_address" {
-  value = flatten(proxmox_virtual_environment_vm.runner.ipv4_addresses)[1] # 0 is usually loopback or link-local in some contexts, but actually ipv4_addresses returns list of ips from agent. 
-  # Note: The bpg provider output for ipv4_addresses depends on the QEMU agent.
+  value = "10.0.40.6"
 }

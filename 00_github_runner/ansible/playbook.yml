@@ -23,6 +23,9 @@
           - tar
           - unzip
           - build-essential
+          - acl
+          - libicu-dev
+          - libssl-dev
         state: present
 
     - name: Install Docker
@@ -38,6 +41,13 @@
         system: no
         create_home: yes
         shell: /bin/bash
+        home: /home/{{ runner_user }}
+
+    - name: Ensure home directory permissions
+      file:
+        path: "/home/{{ runner_user }}"
+        mode: '0755'
+        state: directory
 
     - name: Create runner directory
       file:
@@ -68,6 +78,12 @@
         group: "{{ runner_user }}"
       when: not runner_configured.stat.exists
 
+    - name: Install Runner .NET dependencies
+      shell: ./bin/installdependencies.sh
+      args:
+        chdir: "{{ runner_dir }}"
+      when: not runner_configured.stat.exists
+
     - name: Configure GitHub Runner
       shell: |
         ./config.sh --url {{ github_url }} --token {{ github_token }} --unattended --replace --name {{ inventory_hostname }} --labels self-hosted,proxmox,docker
@@ -76,17 +92,48 @@
       become_user: "{{ runner_user }}"
       when: not runner_configured.stat.exists
 
-    - name: Install Runner service
-      shell: |
-        ./svc.sh install
-      args:
-        chdir: "{{ runner_dir }}"
-      ignore_errors: yes # In case it's already installed but not detected properly (should rely on creates/checks ideally)
-      when: not runner_configured.stat.exists
-
-    - name: Start Runner service
-      shell: |
-        ./svc.sh start
+    - name: Stop existing Runner service
+      shell: ./svc.sh stop
       args:
         chdir: "{{ runner_dir }}"
       ignore_errors: yes
+
+    - name: Uninstall existing Runner service
+      shell: ./svc.sh uninstall
+      args:
+        chdir: "{{ runner_dir }}"
+      ignore_errors: yes
+
+    - name: Clean up _diag directory
+      file:
+        path: "{{ runner_dir }}/_diag"
+        state: absent
+
+    - name: Install Runner service
+      shell: "./svc.sh install {{ runner_user }}"
+      args:
+        chdir: "{{ runner_dir }}"
+      register: svc_install
+      failed_when: svc_install.rc != 0 and "already exists" not in svc_install.stderr
+
+    - name: Ensure recursive ownership of runner directory
+      file:
+        path: "{{ runner_dir }}"
+        owner: "{{ runner_user }}"
+        group: "{{ runner_user }}"
+        recurse: yes
+
+    - name: Start Runner service
+      shell: ./svc.sh start
+      args:
+        chdir: "{{ runner_dir }}"
+
+    - name: Reboot the runner to finalize setup
+      reboot:
+        msg: "Rebooting to finalize runner configuration"
+        connect_timeout: 5
+        reboot_timeout: 300
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: whoami
+
