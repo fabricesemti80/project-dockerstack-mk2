@@ -45,7 +45,7 @@ until ssh -i "$KEY_FILE" -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyCh
 done
 
 # Run Ansible
-ansible-playbook -i "$IP," playbook.yml --private-key "$KEY_FILE" -u "$ANSIBLE_SSH_USER" -e "github_url=$GITHUB_URL" -e "github_token=$GITHUB_TOKEN"
+ansible-playbook -i "$IP," playbook.yml --private-key "$KEY_FILE" -u "$ANSIBLE_SSH_USER" -e "repo_url=$REPO_URL" -e "github_token=$RUNNER_TOKEN"
 
 echo "Waiting for runner to reboot and come online..."
 sleep 45

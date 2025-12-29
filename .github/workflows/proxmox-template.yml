@@ -1,0 +1,50 @@
+name: Proxmox Template
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '01_proxmox_template/**'
+  workflow_dispatch:
+
+jobs:
+  create-template:
+    runs-on: [self-hosted, proxmox, docker]
+    defaults:
+      run:
+        working-directory: ./01_proxmox_template/ansible
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Template (Dockerized)
+        run: |
+          # Verify Doppler is available
+          if ! command -v doppler &> /dev/null;
+            echo "Installing Doppler..."
+            (curl -Ls https://cli.doppler.com/install.sh || wget -qO- https://cli.doppler.com/install.sh) | sh
+          fi
+
+          # Execute Ansible via Docker, injecting secrets from Doppler
+          doppler run -- bash -c '
+            set -e
+            echo "Preparing SSH key..."
+            echo "$ANSIBLE_SSH_PRIVATE_KEY" > ssh_key.pem
+            chmod 600 ssh_key.pem
+            
+            echo "Starting Ansible Container..."
+            docker run --rm \
+              -v "$(pwd):/ansible" \
+              -w /ansible \
+              -e PROXMOX_HOST \
+              -e ANSIBLE_SSH_USER \
+              -e TEMPLATE_PASSWORD \
+              -e TF_VAR_SSH_PUBLIC_KEYS \
+              -e ANSIBLE_HOST_KEY_CHECKING=False \
+              willhallonline/ansible:latest \
+              ansible-playbook -i "$PROXMOX_HOST," playbook.yml --private-key ssh_key.pem -u root
+
+            rm -f ssh_key.pem
+          '
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}

@@ -5,8 +5,8 @@
     runner_version: "2.321.0"
     runner_user: "runner"
     runner_dir: "/home/{{ runner_user }}/actions-runner"
-    # github_url: passed via extra vars
-    # github_token: passed via extra vars
+    # repo_url: passed via extra vars
+    # github_token: passed via extra vars (from RUNNER_TOKEN)
 
   tasks:
     - name: Update apt cache
@@ -26,7 +26,26 @@
           - acl
           - libicu-dev
           - libssl-dev
+          - apt-transport-https
+          - gnupg
         state: present
+
+    - name: Install Doppler CLI
+      shell: |
+        (curl -Ls https://cli.doppler.com/install.sh || wget -qO- https://cli.doppler.com/install.sh) | sh
+      args:
+        creates: /usr/bin/doppler
+
+    - name: Install Ansible
+      apt:
+        name: ansible
+        state: present
+
+    - name: Install Task
+      shell: |
+        sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+      args:
+        creates: /usr/local/bin/task
 
     - name: Install Docker
       shell: curl -fsSL https://get.docker.com | sh
@@ -86,7 +105,7 @@
 
     - name: Configure GitHub Runner
       shell: |
-        ./config.sh --url {{ github_url }} --token {{ github_token }} --unattended --replace --name {{ inventory_hostname }} --labels self-hosted,proxmox,docker
+        ./config.sh --url {{ repo_url }} --token {{ github_token }} --unattended --replace --name {{ inventory_hostname }} --labels self-hosted,proxmox,docker
       args:
         chdir: "{{ runner_dir }}"
       become_user: "{{ runner_user }}"
