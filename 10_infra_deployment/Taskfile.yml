@@ -10,7 +10,7 @@ tasks:
   init:
     desc: Initialize Terraform
     cmds:
-      - doppler run -- terraform init
+      - doppler run -- terraform init --upgrade
 
   plan:
     desc: Plan Terraform changes
