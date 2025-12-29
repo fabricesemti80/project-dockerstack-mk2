@@ -39,6 +39,8 @@ This directory contains the automation to provision the bootstrap runner.
 
 Most directories utilize a `Taskfile.yml` to standardize commands.
 
+### Manual Execution
+You can run any task locally from its respective directory:
 ```bash
 # Example: Deploying the runner
 cd 00_github_runner
@@ -46,4 +48,12 @@ task init
 task plan
 task apply
 task provision
+
+# Example: Creating the VM template
+cd 01_proxmox_template
+task create_template
 ```
+
+### Automated Execution (CI/CD)
+The project includes GitHub Actions workflows that run on your self-hosted runner:
+- **Proxmox Template:** Automatically triggers on changes to `01_proxmox_template/` or can be run manually from the GitHub Actions tab. It executes Ansible within a Docker container to ensure a clean and consistent environment.

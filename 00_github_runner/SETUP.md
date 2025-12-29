@@ -30,6 +30,7 @@ Create the following secrets in your Doppler project config (e.g., `dev`):
    task apply
    task provision
    ```
+   *Note: `task provision` not only configures the runner service but also installs essential automation tools (Ansible, Task, Doppler CLI, Docker) required for subsequent GitHub Actions workflows.*
 
 ## Notes
 

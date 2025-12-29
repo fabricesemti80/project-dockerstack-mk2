@@ -14,11 +14,18 @@ This directory contains the automation to create a Debian 13 Cloud-Init template
 
 ## Usage
 
-1.  **Configure Secrets:** Ensure the above secrets are in your Doppler project.
-2.  **Run Task:**
-    ```bash
-    task create_template
-    ```
+### 1. Manual Creation (Local)
+Use the `Taskfile` to run the playbook using your local Ansible installation:
+```bash
+task create_template
+```
+*Note: This requires Ansible to be installed on your local machine.*
+
+### 2. Automated Creation (GitHub Actions)
+The workflow `.github/workflows/proxmox-template.yml` is configured to run on your **self-hosted runner**.
+- **Triggers:** Automatically on push to `main` affecting this directory, or manually via `workflow_dispatch`.
+- **Environment:** In the automated flow, Ansible runs inside a **Docker container** (`willhallonline/ansible`) to ensure consistency and isolation.
+- **Secrets:** Requires `DOPPLER_TOKEN` to be set in GitHub Repository Secrets.
 
 ## Notes
 
