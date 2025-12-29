@@ -15,6 +15,7 @@ override.tf.json
 # Ansible
 *.retry
 
-# SSH Keys
+# Keys and Secrets
+*.env
 id_rsa
 id_rsa.pub

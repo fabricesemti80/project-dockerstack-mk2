@@ -18,7 +18,7 @@ download_path: "/tmp/{{ image_name }}"
 # Cloud-Init Configuration
 cloud_init_user: "{{ lookup('env', 'ANSIBLE_SSH_USER') | default('fs', true) }}"
 # Default password, should be overridden by env var
-cloud_init_password: "{{ lookup('env', 'TEMPLATE_PASSWORD') | default('changeme', true) }}"
+cloud_init_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('changeme', true) }}"
 
 # SSH Keys (JSON string parsing)
 ssh_public_keys: "{{ lookup('env', 'TF_VAR_SSH_PUBLIC_KEYS') | from_json }}"
