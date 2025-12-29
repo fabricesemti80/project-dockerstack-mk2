@@ -1,0 +1,51 @@
+version: '3'
+
+tasks:
+  default:
+    desc: List all tasks
+    cmds:
+      - task --list
+    silent: true
+
+  init:
+    desc: Initialize Terraform
+    cmds:
+      - doppler run -- terraform init
+
+  plan:
+    desc: Plan Terraform changes
+    cmds:
+      - |
+        doppler run -- bash -c '
+          set -e
+          ./generate_vars.sh
+          trap "rm -f .terraform.tfvars.json" EXIT
+          terraform plan -var-file=".terraform.tfvars.json"
+        '
+
+  apply:
+    desc: Apply Terraform changes
+    cmds:
+      - |
+        doppler run -- bash -c '
+          set -e
+          ./generate_vars.sh
+          trap "rm -f .terraform.tfvars.json" EXIT
+          terraform apply -var-file=".terraform.tfvars.json" -auto-approve
+        '
+
+  destroy:
+    desc: Destroy Terraform resources
+    cmds:
+      - |
+        doppler run -- bash -c '
+          set -e
+          ./generate_vars.sh
+          trap "rm -f .terraform.tfvars.json" EXIT
+          terraform destroy -var-file=".terraform.tfvars.json" -auto-approve
+        '
+
+  output:
+    desc: Show Terraform outputs
+    cmds:
+      - terraform output

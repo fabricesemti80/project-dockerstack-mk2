@@ -29,10 +29,12 @@ This directory contains the automation to provision the bootstrap runner.
 *   Automated Debian 13 template generation on Proxmox.
 *   **[Setup Guide](01_proxmox_template/SETUP.md):** Instructions for template creation.
 
-### 3. Infrastructure (*Upcoming*)
-*   Terraform modules for Proxmox and Hetzner resources.
+### 3. Server Deployment (`10_infra_deployment/`)
+*   Core infrastructure provisioning (Proxmox, Hetzner, Cloudflare).
+*   **[Setup Guide](10_infra_deployment/SETUP.md):** Migration notes and secret requirements.
+*   *Note: Currently uses local state (manual execution only).*
 
-### 4. Configuration (*Upcoming*)
+### 4. Configuration (`11_infra_configuration/`)
 *   Ansible roles for system hardening, Docker setup, and networking.
 
 ## Usage
