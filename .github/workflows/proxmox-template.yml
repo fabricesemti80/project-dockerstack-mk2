@@ -28,14 +28,14 @@ jobs:
             echo "Preparing SSH key..."
             echo "$ANSIBLE_SSH_PRIVATE_KEY" > ssh_key.pem
             chmod 600 ssh_key.pem
-            
+
             echo "Starting Ansible Container..."
             docker run --rm \
               -v "$(pwd):/ansible" \
               -w /ansible \
               -e PROXMOX_HOST \
               -e ANSIBLE_SSH_USER \
-              -e TEMPLATE_PASSWORD \
+              -e ADMIN_PASSWORD \
               -e TF_VAR_SSH_PUBLIC_KEYS \
               -e ANSIBLE_HOST_KEY_CHECKING=False \
               willhallonline/ansible:latest \
