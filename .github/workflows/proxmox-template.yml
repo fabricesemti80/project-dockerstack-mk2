@@ -20,7 +20,7 @@ jobs:
       - name: Create Template (Dockerized)
         run: |
           # Verify Doppler is available
-          if ! command -v doppler &> /dev/null;
+          if ! command -v doppler &> /dev/null; then
             echo "Installing Doppler..."
             (curl -Ls https://cli.doppler.com/install.sh || wget -qO- https://cli.doppler.com/install.sh) | sh
           fi
