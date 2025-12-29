@@ -1,0 +1,92 @@
+---
+- hosts: all
+  become: true
+  vars:
+    runner_version: "2.321.0"
+    runner_user: "runner"
+    runner_dir: "/home/{{ runner_user }}/actions-runner"
+    # github_url: passed via extra vars
+    # github_token: passed via extra vars
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install dependencies
+      apt:
+        name:
+          - curl
+          - git
+          - jq
+          - tar
+          - unzip
+          - build-essential
+        state: present
+
+    - name: Install Docker
+      shell: curl -fsSL https://get.docker.com | sh
+      args:
+        creates: /usr/bin/docker
+
+    - name: Create runner user
+      user:
+        name: "{{ runner_user }}"
+        groups: docker
+        append: yes
+        system: no
+        create_home: yes
+        shell: /bin/bash
+
+    - name: Create runner directory
+      file:
+        path: "{{ runner_dir }}"
+        state: directory
+        owner: "{{ runner_user }}"
+        group: "{{ runner_user }}"
+
+    - name: Check if runner is already configured
+      stat:
+        path: "{{ runner_dir }}/.credentials"
+      register: runner_configured
+
+    - name: Download GitHub Runner
+      get_url:
+        url: "https://github.com/actions/runner/releases/download/v{{ runner_version }}/actions-runner-linux-x64-{{ runner_version }}.tar.gz"
+        dest: "{{ runner_dir }}/actions-runner.tar.gz"
+        owner: "{{ runner_user }}"
+        group: "{{ runner_user }}"
+      when: not runner_configured.stat.exists
+
+    - name: Extract GitHub Runner
+      unarchive:
+        src: "{{ runner_dir }}/actions-runner.tar.gz"
+        dest: "{{ runner_dir }}"
+        remote_src: yes
+        owner: "{{ runner_user }}"
+        group: "{{ runner_user }}"
+      when: not runner_configured.stat.exists
+
+    - name: Configure GitHub Runner
+      shell: |
+        ./config.sh --url {{ github_url }} --token {{ github_token }} --unattended --replace --name {{ inventory_hostname }} --labels self-hosted,proxmox,docker
+      args:
+        chdir: "{{ runner_dir }}"
+      become_user: "{{ runner_user }}"
+      when: not runner_configured.stat.exists
+
+    - name: Install Runner service
+      shell: |
+        ./svc.sh install
+      args:
+        chdir: "{{ runner_dir }}"
+      ignore_errors: yes # In case it's already installed but not detected properly (should rely on creates/checks ideally)
+      when: not runner_configured.stat.exists
+
+    - name: Start Runner service
+      shell: |
+        ./svc.sh start
+      args:
+        chdir: "{{ runner_dir }}"
+      ignore_errors: yes

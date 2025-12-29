@@ -1,0 +1,51 @@
+version: '3'
+
+vars:
+  TF_DIR: terraform
+  ANSIBLE_DIR: ansible
+
+tasks:
+  init:
+    desc: Initialize Terraform
+    dir: '{{.TF_DIR}}'
+    cmd: doppler run -- terraform init
+
+  plan:
+    desc: Plan Terraform changes
+    dir: '{{.TF_DIR}}'
+    cmd: doppler run -- terraform plan
+
+  apply:
+    desc: Apply Terraform changes
+    dir: '{{.TF_DIR}}'
+    cmd: doppler run -- terraform apply -auto-approve
+
+  destroy:
+    desc: Destroy Terraform resources
+    dir: '{{.TF_DIR}}'
+    cmd: doppler run -- terraform destroy -auto-approve
+
+  output:
+    desc: Show Terraform outputs
+    dir: '{{.TF_DIR}}'
+    cmd: terraform output
+
+  provision:
+    desc: Provision the runner with Ansible
+    dir: '{{.ANSIBLE_DIR}}'
+    cmds:
+      - |
+        IP=$(cd ../{{.TF_DIR}} && terraform output -raw vm_ipv4_address 2>/dev/null || echo "")
+        if [ -z "$IP" ]; then
+          echo "Could not get IP from Terraform output. Please provide IP=x.x.x.x"
+          exit 1
+        fi
+        echo "Provisioning runner at $IP..."
+        # Wait for SSH availability (simple loop)
+        while ! nc -z $IP 22; do   
+          echo "Waiting for SSH on $IP..."
+          sleep 5
+        done
+        doppler run -- ansible-playbook -i "$IP," playbook.yml -e "github_url=$GITHUB_URL" -e "github_token=$GITHUB_TOKEN"
+    vars:
+      IP: '{{.IP}}'
