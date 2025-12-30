@@ -6,6 +6,8 @@ version: "3.9"
 services:
   beszel:
     image: henrygd/beszel:latest
+    ports:
+      - "8090:8090"
     volumes:
       - beszel_data:/beszel_data
     networks:
@@ -27,21 +29,15 @@ services:
 
   beszel-agent:
     image: henrygd/beszel-agent:latest
+    network_mode: host
     environment:
-      - PORT=45876
-      - KEY=${BESZEL_AGENT_KEY}
-      # Push mode configuration - internal communication via Swarm Overlay
-      - TOKEN=${BESZEL_AGENT_TOKEN}
-      - HUB_URL=http://beszel:8090
+      - LISTEN=45876
+      - KEY="${BESZEL_AGENT_KEY}"
+      - TOKEN="${BESZEL_AGENT_TOKEN}"
+      - HUB_URL=http://100.115.30.57:8090
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    ports:
-      - target: 45876
-        published: 45876
-        protocol: tcp
-        mode: host
-    networks:
-      - proxy
+      - beszel_agent_data:/var/lib/beszel-agent
     deploy:
       mode: global
       placement:
@@ -49,6 +45,12 @@ services:
 
 volumes:
   beszel_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/beszel_data
+  beszel_agent_data:
 
 networks:
   proxy:
