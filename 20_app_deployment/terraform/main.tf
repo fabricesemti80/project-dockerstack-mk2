@@ -28,6 +28,7 @@ resource "portainer_stack" "traefik" {
   repository_reference_name = var.repository_branch
   file_path_in_repository   = "docker/traefik/traefik-stack.yml"
   force_update              = true
+  pull_image                = true
 
   env {
     name  = "CLOUDFLARE_API_TOKEN"
@@ -54,6 +55,7 @@ resource "portainer_stack" "whoami" {
   repository_reference_name = var.repository_branch
   file_path_in_repository   = "docker/traefik/whoami-stack.yml"
   force_update              = true
+  pull_image                = true
 
   env {
     name  = "DOMAIN"
@@ -72,6 +74,7 @@ resource "portainer_stack" "cloudflared" {
   repository_reference_name = var.repository_branch
   file_path_in_repository   = "docker/cloudflared/cloudflared-stack.yml"
   force_update              = true
+  pull_image                = true
 
   env {
     name  = "CLOUDFLARE_TUNNEL_TOKEN"

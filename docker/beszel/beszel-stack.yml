@@ -1,50 +1,60 @@
-# Beszel - Lightweight server monitoring
+# Beszel Monitoring Stack
 # https://www.beszel.dev/
+#
+# Environment Variables (from Doppler via Terraform):
+# - DOMAIN: Base domain for routing (e.g., example.com)
+# - BESZEL_AGENT_KEY: Hub's public key for agent authentication (ssh-ed25519...)
+# - BESZEL_AGENT_TOKEN: Agent token for push mode authentication
 
 version: "3.9"
 
 services:
-  beszel:
+  # Beszel Hub - Web UI and database
+  hub:
     image: henrygd/beszel:latest
-    ports:
-      - "8090:8090"
-    volumes:
-      - beszel_data:/beszel_data
     networks:
       - proxy
+    volumes:
+      - beszel-data:/beszel_data
     deploy:
       mode: replicated
       replicas: 1
       placement:
         constraints:
           - node.role == manager
+          - node.labels.cloud == true
           - node.labels.leader == true
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=proxy"
+        - "traefik.http.services.beszel.loadbalancer.server.port=8090"
         - "traefik.http.routers.beszel.rule=Host(`beszel.${DOMAIN}`)"
         - "traefik.http.routers.beszel.entrypoints=websecure"
         - "traefik.http.routers.beszel.tls.certresolver=cloudflare"
-        - "traefik.http.services.beszel.loadbalancer.server.port=8090"
 
-  beszel-agent:
+  # Beszel Agent - Runs on all nodes for monitoring
+  agent:
     image: henrygd/beszel-agent:latest
-    # Host network is required for host metrics
-    network_mode: host
     environment:
-      LISTEN: 45876
-      KEY: ${BESZEL_AGENT_KEY}
+      - PORT=45876
+      - KEY=${BESZEL_AGENT_KEY}
+      - TOKEN=${BESZEL_AGENT_TOKEN}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /:/host:ro
+    ports:
+      - target: 45876
+        published: 45876
+        protocol: tcp
+        mode: host
     deploy:
       mode: global
-      placement:
-        constraints: [node.platform.os == linux]
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
 
 volumes:
-  beszel_data:
-  beszel_agent_data:
+  beszel-data:
 
 networks:
   proxy:
