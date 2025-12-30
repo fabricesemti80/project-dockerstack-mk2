@@ -90,6 +90,7 @@ resource "portainer_stack" "beszel" {
   repository_reference_name = var.repository_branch
   file_path_in_repository   = "docker/beszel/beszel-stack.yml"
   force_update              = true
+  pull_image                = true
 
   env {
     name  = "DOMAIN"
@@ -104,6 +105,11 @@ resource "portainer_stack" "beszel" {
   env {
     name  = "BESZEL_AGENT_TOKEN"
     value = var.beszel_agent_token
+  }
+
+  env {
+    name  = "LAST_UPDATE"
+    value = timestamp()
   }
 
   depends_on = [portainer_stack.traefik]
