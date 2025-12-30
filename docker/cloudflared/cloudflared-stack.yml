@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    networks:
+      - proxy
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    command: tunnel run
+    deploy:
+      mode: replicated
+      replicas: 2
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+networks:
+  proxy:
+    external: true
