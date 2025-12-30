@@ -33,9 +33,9 @@ services:
     network_mode: host
     environment:
       - LISTEN=45876
-      - KEY=${BESZEL_AGENT_KEY}
+      # Using only TOKEN and HUB_URL for push mode
       - TOKEN=${BESZEL_AGENT_TOKEN}
-      - HUB_URL=http://100.115.30.57:8090
+      - HUB_URL=https://beszel.${DOMAIN}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - beszel_agent_data:/var/lib/beszel-agent
