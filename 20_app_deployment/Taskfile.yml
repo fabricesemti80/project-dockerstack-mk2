@@ -17,16 +17,46 @@ tasks:
     desc: Plan Terraform changes
     dir: terraform
     cmds:
-      - doppler run -- sh -c 'export TF_VAR_portainer_access_token="$PORTAINER_ACCESS_TOKEN" && export TF_VAR_cloudflare_api_token="$CLOUDFLARE_API_TOKEN" && export TF_VAR_cloudflare_tunnel_token="$CLOUDFLARE_TUNNEL_TOKEN" && export TF_VAR_acme_email="${ACME_EMAIL:-$EMAIL}" && export TF_VAR_apps_domain="$DOMAIN" && export TF_VAR_beszel_agent_key="$BESZEL_AGENT_KEY" && export TF_VAR_beszel_agent_token="$BESZEL_AGENT_TOKEN" && terraform plan'
+      - |
+        doppler run -- sh -c '
+          terraform plan \
+            -var="portainer_access_token=$PORTAINER_ACCESS_TOKEN" \
+            -var="cloudflare_api_token=$CLOUDFLARE_API_TOKEN" \
+            -var="cloudflare_tunnel_token=$CLOUDFLARE_TUNNEL_TOKEN" \
+            -var="acme_email=${ACME_EMAIL:-$EMAIL}" \
+            -var="apps_domain=$DOMAIN" \
+            -var="beszel_agent_key=$BESZEL_AGENT_KEY" \
+            -var="beszel_agent_token=$BESZEL_AGENT_TOKEN"
+        '
 
   apply:
     desc: Apply Terraform changes
     dir: terraform
     cmds:
-      - doppler run -- sh -c 'export TF_VAR_portainer_access_token="$PORTAINER_ACCESS_TOKEN" && export TF_VAR_cloudflare_api_token="$CLOUDFLARE_API_TOKEN" && export TF_VAR_cloudflare_tunnel_token="$CLOUDFLARE_TUNNEL_TOKEN" && export TF_VAR_acme_email="${ACME_EMAIL:-$EMAIL}" && export TF_VAR_apps_domain="$DOMAIN" && export TF_VAR_beszel_agent_key="$BESZEL_AGENT_KEY" && export TF_VAR_beszel_agent_token="$BESZEL_AGENT_TOKEN" && terraform apply -auto-approve'
+      - |
+        doppler run -- sh -c '
+          terraform apply -auto-approve \
+            -var="portainer_access_token=$PORTAINER_ACCESS_TOKEN" \
+            -var="cloudflare_api_token=$CLOUDFLARE_API_TOKEN" \
+            -var="cloudflare_tunnel_token=$CLOUDFLARE_TUNNEL_TOKEN" \
+            -var="acme_email=${ACME_EMAIL:-$EMAIL}" \
+            -var="apps_domain=$DOMAIN" \
+            -var="beszel_agent_key=$BESZEL_AGENT_KEY" \
+            -var="beszel_agent_token=$BESZEL_AGENT_TOKEN"
+        '
 
   destroy:
     desc: Destroy Terraform resources
     dir: terraform
     cmds:
-      - doppler run -- sh -c 'export TF_VAR_portainer_access_token="$PORTAINER_ACCESS_TOKEN" && export TF_VAR_cloudflare_api_token="$CLOUDFLARE_API_TOKEN" && export TF_VAR_cloudflare_tunnel_token="$CLOUDFLARE_TUNNEL_TOKEN" && export TF_VAR_acme_email="${ACME_EMAIL:-$EMAIL}" && export TF_VAR_apps_domain="$DOMAIN" && export TF_VAR_beszel_agent_key="$BESZEL_AGENT_KEY" && export TF_VAR_beszel_agent_token="$BESZEL_AGENT_TOKEN" && terraform destroy -auto-approve'
+      - |
+        doppler run -- sh -c '
+          terraform destroy -auto-approve \
+            -var="portainer_access_token=$PORTAINER_ACCESS_TOKEN" \
+            -var="cloudflare_api_token=$CLOUDFLARE_API_TOKEN" \
+            -var="cloudflare_tunnel_token=$CLOUDFLARE_TUNNEL_TOKEN" \
+            -var="acme_email=${ACME_EMAIL:-$EMAIL}" \
+            -var="apps_domain=$DOMAIN" \
+            -var="beszel_agent_key=$BESZEL_AGENT_KEY" \
+            -var="beszel_agent_token=$BESZEL_AGENT_TOKEN"
+        '
