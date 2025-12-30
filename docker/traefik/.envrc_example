@@ -1,0 +1,13 @@
+# Timezone (e.g., Europe/London)
+TZ=Europe/London
+
+# Cloudflare Credentials for Let's Encrypt DNS Challenge
+ACME_EMAIL=your_email@example.com
+CF_DNS_API_TOKEN=your_cloudflare_dns_api_token
+
+# External Domain (e.g., example.com)
+DOMAIN=example.com
+
+# IP Address of the Manager Node (for Homepage/nip.io links)
+# This is usually the IP of the node where Traefik runs (manager)
+DOCKER_SERVER_IP=10.0.30.11

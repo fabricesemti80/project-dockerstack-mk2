@@ -1,0 +1,74 @@
+#?  https://doc.traefik.io/traefik/setup/swarm/
+
+# CLOUDFLARE_API_TOKEN=your_cloudflare_api_token
+# ACME_EMAIL=your_email@example.com
+# DOMAIN=example.com
+
+version: "3.9"
+
+services:
+  traefik:
+    image: traefik:v3.6.5
+    command:
+      # Logging
+      - "--log.level=INFO"
+
+      # API / Dashboard
+      - "--api=true"
+      - "--api.dashboard=true"
+
+      # Swarm provider
+      - "--providers.swarm=true"
+      - "--providers.swarm.exposedbydefault=false"
+      - "--providers.swarm.network=proxy"
+
+      # EntryPoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+
+      # HTTP → HTTPS
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+
+      # Let's Encrypt (Cloudflare DNS-01)
+      - "--certificatesresolvers.cloudflare.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.cloudflare.acme.storage=/acme/acme.json"
+      - "--certificatesresolvers.cloudflare.acme.dnschallenge=true"
+      - "--certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare"
+
+    environment:
+      - CF_DNS_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+
+    ports:
+      - "80:80"
+      - "443:443"
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-acme:/acme
+
+    networks:
+      - proxy
+
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.cloud == true
+          - node.labels.leader == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)"
+        - "traefik.http.routers.traefik.entrypoints=websecure"
+        - "traefik.http.routers.traefik.tls.certresolver=cloudflare"
+        - "traefik.http.routers.traefik.service=api@internal"
+
+volumes:
+  traefik-acme:
+
+networks:
+  proxy:
+    external: true
