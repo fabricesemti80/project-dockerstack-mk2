@@ -1,0 +1,26 @@
+version: '3'
+
+tasks:
+  init:
+    desc: Initialize Terraform
+    dir: terraform
+    cmds:
+      - doppler run -- terraform init
+
+  plan:
+    desc: Plan Terraform changes
+    dir: terraform
+    cmds:
+      - doppler run -- sh -c 'export TF_VAR_portainer_access_token="$PORTAINER_ACCESS_TOKEN" && terraform plan'
+
+  apply:
+    desc: Apply Terraform changes
+    dir: terraform
+    cmds:
+      - doppler run -- sh -c 'export TF_VAR_portainer_access_token="$PORTAINER_ACCESS_TOKEN" && TF_LOG=DEBUG terraform apply -auto-approve 2> /tmp/tf_debug.log'
+
+  destroy:
+    desc: Destroy Terraform resources
+    dir: terraform
+    cmds:
+      - doppler run -- sh -c 'export TF_VAR_portainer_access_token="$PORTAINER_ACCESS_TOKEN" && terraform destroy -auto-approve'
