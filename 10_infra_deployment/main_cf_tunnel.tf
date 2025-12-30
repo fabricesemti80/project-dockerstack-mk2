@@ -74,7 +74,7 @@ resource "cloudflare_dns_record" "wildcard_tunnel" {
 
 # Construct the Tunnel Token manually since it might not be exported by the resource
 locals {
-  tunnel_token = base64encode(jsonencode({
+  CLOUDFLARE_TUNNEL_TOKEN = base64encode(jsonencode({
     a = var.CLOUDFLARE_ACCOUNT_ID
     t = cloudflare_zero_trust_tunnel_cloudflared.main.id
     s = random_id.tunnel_secret.b64_std
@@ -83,7 +83,7 @@ locals {
 
 # Output the Tunnel Token to a local .env file for Docker/Portainer use
 resource "local_file" "tunnel_env" {
-  content         = "TUNNEL_TOKEN=${local.tunnel_token}"
+  content         = "CLOUDFLARE_TUNNEL_TOKEN=${local.CLOUDFLARE_TUNNEL_TOKEN}"
   filename        = "${path.module}/../docker/cloudflared/.env"
   file_permission = "0600"
 }
