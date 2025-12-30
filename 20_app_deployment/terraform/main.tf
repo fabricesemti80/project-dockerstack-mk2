@@ -109,15 +109,5 @@ resource "portainer_stack" "beszel" {
     value = var.beszel_agent_key
   }
 
-  env {
-    name  = "BESZEL_AGENT_TOKEN"
-    value = var.beszel_agent_token
-  }
-
-  env {
-    name  = "LAST_UPDATE"
-    value = timestamp()
-  }
-
   depends_on = [portainer_stack.traefik]
 }
