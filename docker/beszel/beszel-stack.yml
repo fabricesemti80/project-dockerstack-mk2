@@ -1,56 +1,53 @@
-# Beszel Monitoring Stack (Push Mode)
+# Beszel Monitoring Stack (Pull Mode)
 # https://www.beszel.dev/
-#
-# Environment Variables (from Doppler via Terraform):
-# - DOMAIN: Base domain for routing (e.g., example.com)
-# - BESZEL_AGENT_KEY: Hub's public key for agent authentication (ssh-ed25519...)
 
 version: "3.9"
 
 services:
-  # Beszel Hub - Web UI and database
-  hub:
+  beszel:
     image: henrygd/beszel:latest
+    ports:
+      - "8090:8090"
+    volumes:
+      - beszel_data:/beszel_data
     networks:
       - proxy
-    volumes:
-      - beszel-data:/beszel_data
     deploy:
       mode: replicated
       replicas: 1
       placement:
         constraints:
           - node.role == manager
-          - node.labels.cloud == true
           - node.labels.leader == true
       labels:
         - "traefik.enable=true"
-        - "traefik.http.services.beszel.loadbalancer.server.port=8090"
+        - "traefik.docker.network=proxy"
         - "traefik.http.routers.beszel.rule=Host(`beszel.${DOMAIN}`)"
         - "traefik.http.routers.beszel.entrypoints=websecure"
         - "traefik.http.routers.beszel.tls.certresolver=cloudflare"
+        - "traefik.http.services.beszel.loadbalancer.server.port=8090"
 
-  # Beszel Agent - Push Mode (agents connect to hub)
-  agent:
+  beszel-agent:
     image: henrygd/beszel-agent:latest
+    # Host network ports are required for accurate host metrics in Swarm
+    ports:
+      - target: 45876
+        published: 45876
+        protocol: tcp
+        mode: host
     environment:
-      - KEY=${BESZEL_AGENT_KEY:-}
-      - HUB_URL=https://beszel.${DOMAIN}
-      - TOKEN=${BESZEL_AGENT_TOKEN}
+      LISTEN: 45876
+      KEY: ${BESZEL_AGENT_KEY}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - proxy
+      - /:/host:ro # Allows monitoring host disks
     deploy:
       mode: global
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 64M
+      placement:
+        constraints: [node.platform.os == linux]
 
 volumes:
-  beszel-data:
+  beszel_data:
 
 networks:
   proxy:
