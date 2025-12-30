@@ -1,0 +1,49 @@
+# Jellyfin - Media Server
+# https://jellyfin.org/
+
+version: "3.9"
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    networks:
+      - proxy
+    volumes:
+      - jellyfin-config:/config
+      - jellyfin-cache:/cache
+      - type: bind
+        source: /data/media
+        target: /media
+        read_only: true
+    ports:
+      # Direct local access via Swarm Ingress Mesh
+      - target: 8096
+        published: 8096
+        protocol: tcp
+        mode: ingress
+    environment:
+      - JELLYFIN_PublishedServerUrl=https://jellyfin.${DOMAIN}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.proxmox == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=proxy"
+        - "traefik.http.routers.jellyfin.rule=Host(`jellyfin.${DOMAIN}`)"
+        - "traefik.http.routers.jellyfin.entrypoints=websecure"
+        - "traefik.http.routers.jellyfin.tls.certresolver=cloudflare"
+        - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+        # Increase timeout for large file uploads/metadata scanning if needed
+        - "traefik.http.routers.jellyfin.middlewares=jellyfin-compress"
+        - "traefik.http.middlewares.jellyfin-compress.compress=true"
+
+volumes:
+  jellyfin-config:
+  jellyfin-cache:
+
+networks:
+  proxy:
+    external: true
