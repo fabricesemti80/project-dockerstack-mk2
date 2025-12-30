@@ -19,6 +19,7 @@ services:
           - node.labels.leader == true
       labels:
         - "traefik.enable=true"
+        - "traefik.docker.network=proxy"
         - "traefik.http.routers.beszel.rule=Host(`beszel.${DOMAIN}`)"
         - "traefik.http.routers.beszel.entrypoints=websecure"
         - "traefik.http.routers.beszel.tls.certresolver=cloudflare"
