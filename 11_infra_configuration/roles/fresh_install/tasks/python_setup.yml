@@ -1,0 +1,24 @@
+---
+- name: Switch to pip3
+  ansible.builtin.alternatives:
+    name: pip
+    link: /usr/bin/pip
+    path: /usr/bin/pip3
+
+- name: Switch to python3
+  ansible.builtin.alternatives:
+    name: python
+    link: /usr/bin/python
+    path: /usr/bin/python3
+
+- name: Install role-specific pip packages
+  ansible.builtin.pip:
+    name: "{{ role_pip_packages }}"
+    executable: pip3
+
+- name: Install external role pip packages
+  ansible.builtin.pip:
+    name: "{{ item.name }}"
+    executable: pip3
+  loop: "{{ pip_install_packages | default([]) }}"
+  when: pip_install_packages is defined

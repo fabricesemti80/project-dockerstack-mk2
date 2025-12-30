@@ -1,0 +1,23 @@
+version: '3'
+
+vars:
+  PLAYBOOK: playbooks/main.yml
+  INVENTORY: inventory/hosts
+
+tasks:
+  init:
+    desc: Install Ansible dependencies
+    cmds:
+      - ansible-galaxy collection install community.general ansible.posix
+      - ansible-galaxy role install -p roles/ geerlingguy.docker geerlingguy.pip artis3n.tailscale
+
+  plan:
+    desc: Run Ansible playbook in check mode (dry run)
+    cmds:
+      - doppler run -- ansible-playbook -i {{.INVENTORY}} {{.PLAYBOOK}} --check --diff
+
+  apply:
+    desc: Run Ansible playbook to apply changes
+    cmds:
+      - echo "Applying changes..."
+      - doppler run -- ansible-playbook -i {{.INVENTORY}} {{.PLAYBOOK}}

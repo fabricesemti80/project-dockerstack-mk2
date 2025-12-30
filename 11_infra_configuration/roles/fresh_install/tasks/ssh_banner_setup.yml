@@ -1,0 +1,25 @@
+---
+- name: Create SSH banner with system information
+  ansible.builtin.template:
+    src: ssh_banner.j2
+    dest: /etc/ssh/banner
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart ssh
+
+- name: Configure SSH to use banner
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?Banner'
+    line: 'Banner /etc/ssh/banner'
+    backup: true
+  notify: restart ssh
+
+- name: Ensure SSH banner is enabled in sshd_config
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PrintMotd'
+    line: 'PrintMotd no'
+    backup: true
+  notify: restart ssh

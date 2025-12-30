@@ -1,0 +1,25 @@
+---
+- name: Ensure group docker exists
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Add admin user to docker group
+  ansible.builtin.user:
+    name: "{{ admin_user }}"
+    groups:
+      - docker
+    append: true
+
+- name: Add secondary user to docker group
+  ansible.builtin.user:
+    name: "{{ secondary_user }}"
+    groups:
+      - docker
+    append: true
+
+- name: Make sure Docker is running and enabled
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true

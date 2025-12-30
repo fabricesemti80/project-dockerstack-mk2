@@ -1,0 +1,163 @@
+---
+- name: Install Webmin and Usermin prerequisites
+  ansible.builtin.apt:
+    name:
+      - perl
+      - libnet-ssleay-perl
+      - openssl
+      - libauthen-pam-perl
+      - libpam-runtime
+      - libio-pty-perl
+      - apt-show-versions
+      - python3
+      - libwww-perl
+      - liblwp-protocol-https-perl
+      - shared-mime-info
+      - curl
+      - wget
+    state: latest
+    update_cache: true
+
+- name: Check if Webmin is already installed
+  ansible.builtin.shell: dpkg -l webmin 2>/dev/null | grep -q "^ii"
+  register: webmin_installed
+  failed_when: false
+  changed_when: false
+
+- name: Check if Webmin repository is already configured
+  ansible.builtin.stat:
+    path: /etc/apt/sources.list.d/webmin.list
+  register: webmin_repo_exists
+
+- name: Check if Usermin is already installed
+  ansible.builtin.shell: dpkg -l usermin 2>/dev/null | grep -q "^ii"
+  register: usermin_installed
+  failed_when: false
+  changed_when: false
+
+- name: Download official Webmin repository setup script
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/webmin/webmin/master/setup-repos.sh"
+    dest: /tmp/usermin-setup-repos.sh
+    mode: '0755'
+  when: >-
+    (webmin_installed.rc != 0 or usermin_installed.rc != 0) and
+    not webmin_repo_exists.stat.exists
+
+- name: Run official Webmin repository setup script
+  ansible.builtin.shell: echo "y" | /tmp/usermin-setup-repos.sh
+  when: >-
+    (webmin_installed.rc != 0 or usermin_installed.rc != 0) and
+    not webmin_repo_exists.stat.exists
+  register: webmin_repo_setup
+  changed_when: true
+
+- name: Update package cache after repository setup
+  ansible.builtin.apt:
+    update_cache: true
+  when: >-
+    (webmin_installed.rc != 0 or usermin_installed.rc != 0) and
+    not webmin_repo_exists.stat.exists
+
+- name: Clean up repository setup script
+  ansible.builtin.file:
+    path: /tmp/usermin-setup-repos.sh
+    state: absent
+  when: (webmin_installed.rc != 0 or usermin_installed.rc != 0)
+
+- name: Install Webmin and Usermin with recommended packages
+  ansible.builtin.apt:
+    name:
+      - webmin
+      - usermin
+    state: latest
+    install_recommends: true
+    update_cache: true
+  when: webmin_installed.rc != 0 or usermin_installed.rc != 0
+
+- name: Ensure Webmin service is running and enabled
+  ansible.builtin.systemd:
+    name: webmin
+    state: started
+    enabled: true
+
+- name: Ensure Usermin service is running and enabled
+  ansible.builtin.systemd:
+    name: usermin
+    state: started
+    enabled: true
+
+- name: Configure Webmin to allow admin users
+  ansible.builtin.lineinfile:
+    path: /etc/webmin/webmin.acl
+    regexp: "^{{ admin_user }}:"
+    line: "{{ admin_user }}: *"
+    create: true
+  notify: restart webmin
+
+- name: Configure Webmin to allow secondary user
+  ansible.builtin.lineinfile:
+    path: /etc/webmin/webmin.acl
+    regexp: "^{{ secondary_user }}:"
+    line: "{{ secondary_user }}: *"
+    create: true
+  notify: restart webmin
+
+- name: Set Webmin to use SSL/TLS
+  ansible.builtin.lineinfile:
+    path: /etc/webmin/miniserv.conf
+    regexp: "^ssl="
+    line: "ssl=1"
+    backup: true
+  notify: restart webmin
+
+- name: Configure Webmin bind address
+  ansible.builtin.lineinfile:
+    path: /etc/webmin/miniserv.conf
+    regexp: "^bind="
+    line: "bind=0.0.0.0"
+    backup: true
+  notify: restart webmin
+  when: webmin_bind_all_interfaces | default(true) | bool
+
+- name: Configure Webmin port
+  ansible.builtin.lineinfile:
+    path: /etc/webmin/miniserv.conf
+    regexp: "^port="
+    line: "port={{ webmin_port | default(10000) }}"
+    backup: true
+  notify: restart webmin
+
+- name: Configure Usermin port
+  ansible.builtin.lineinfile:
+    path: /etc/usermin/miniserv.conf
+    regexp: "^port="
+    line: "port={{ usermin_port | default(20000) }}"
+    backup: true
+  notify: restart usermin
+
+- name: Set up Webmin users (admin user)
+  ansible.builtin.shell: >-
+    /usr/share/webmin/changepass.pl /etc/webmin {{ admin_user }}
+    {{ admin_password | default('changeme') }}
+  when: admin_password is defined
+  no_log: true
+  changed_when: true
+
+- name: Set up Webmin users (secondary user)
+  ansible.builtin.shell: >-
+    /usr/share/webmin/changepass.pl /etc/webmin {{ secondary_user }}
+    {{ secondary_password | default('changeme') }}
+  when: secondary_password is defined
+  no_log: true
+  changed_when: true
+
+- name: Configure Webmin for Traefik reverse proxy - Add referers
+  ansible.builtin.lineinfile:
+    path: /etc/webmin/config
+    regexp: "^referers="
+    line: "referers=webmin.{{ apps_domain | default('thinkncode.biz', true) }}"
+    create: true
+    backup: true
+  notify: restart webmin
+  when: configure_webmin_reverse_proxy | default(true) | bool

@@ -1,0 +1,71 @@
+---
+- name: Check if neovim is installed via the package manager
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Check if neovim is installed
+  ansible.builtin.command:
+    cmd: which nvim
+  register: nvim
+  changed_when: false
+  failed_when: false
+
+- name: Check the nvim version if installed
+  ansible.builtin.shell:
+    cmd: "nvim --version | head -n 1 | cut -c 6-"
+  register: neovim_version
+  when: nvim.rc == 0
+  changed_when: false
+
+- name: Set current neovim version to 0 if not installed
+  ansible.builtin.set_fact:
+    neovim_version:
+      stdout: 0
+  when: nvim.rc == 1
+
+- name: Check latest neovim release
+  community.general.github_release:
+    user: neovim
+    repo: neovim
+    action: latest_release
+    token: "{{ github_personal_access_token | default(omit) }}"
+  register: neovim_release
+  failed_when: false # Don't fail if GitHub API limit reached
+  changed_when: neovim_release.tag is defined and neovim_release.tag != neovim_version.stdout
+
+- name: Install neovim from source
+  when: 
+    - neovim_release.tag is defined 
+    - neovim_release.tag != neovim_version.stdout
+  block:
+    - name: Install python modules for neovim
+      ansible.builtin.pip:
+        name:
+          - setuptools
+          - pynvim
+        executable: pip3
+
+    - name: Grab the latest release source
+      ansible.builtin.unarchive:
+        src: "https://github.com/neovim/neovim/archive/{{ neovim_release['tag'] }}.tar.gz"
+        dest: /tmp
+        remote_src: true
+
+    - name: Get the neovim folder
+      ansible.builtin.find:
+        paths: /tmp
+        patterns: "^neovim.*$"
+        use_regex: true
+        file_type: directory
+        recurse: false
+      register: neovim_source
+
+    - name: Compile and install neovim
+      ansible.builtin.shell:
+        cmd: cd {{ neovim_source.files[0].path }} && make install
+      changed_when: true
+
+    - name: Clean up neovim source
+      ansible.builtin.file:
+        path: "{{ neovim_source.files[0].path }}"
+        state: absent

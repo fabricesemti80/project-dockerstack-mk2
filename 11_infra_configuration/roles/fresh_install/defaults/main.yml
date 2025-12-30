@@ -1,0 +1,97 @@
+---
+# Use environment variables if available, otherwise fall back to defaults
+admin_user: "{{ lookup('env', 'ANSIBLE_SSH_USER') | default('fs', true) }}"
+secondary_user: hacstac
+
+# Pull SSH keys from environment (expected as JSON string)
+ssh_public_keys: "{{ lookup('env', 'TF_VAR_SSH_PUBLIC_KEYS') | default('[]', true) }}"
+
+install_neovim: true
+install_storage: true
+install_docker: true
+install_zsh: true
+create_homelab_structure: true
+install_webmin: true
+
+zsh_set_as_default: true
+enable_acl_permissions: false
+
+webmin_port: 10000
+usermin_port: 20000
+webmin_bind_all_interfaces: true
+configure_webmin_reverse_proxy: true
+
+# Domains from environment
+apps_domain: "{{ lookup('env', 'DOMAIN') | default('media.thinkncode.biz', true) }}"
+domain_ops: "{{ lookup('env', 'DOMAIN_OPS') | default('', true) }}"
+domain_media: "{{ lookup('env', 'DOMAIN_MEDIA') | default('', true) }}"
+
+basic_packages:
+  - zsh
+  - git
+  - wget
+  - curl
+  - keychain
+  - vim
+  - build-essential
+  - zip
+  - make
+  - gcc
+  - bash
+  - bc
+  - ca-certificates
+  - iputils-ping
+  - jq
+  - less
+  - libperl-dev
+  - libxml2-utils
+  - openssh-client
+  - parallel
+  - perl
+  - time
+  - unzip
+  - lvm2
+  - dnsutils
+  - net-tools
+  - qemu-guest-agent
+  - apt-transport-https
+  - gnupg
+  - nfs-common
+
+neovim_dependencies:
+  - golang
+  - ninja-build
+  - gettext
+  - libtool
+  - libtool-bin
+  - autoconf
+  - automake
+  - cmake
+  - g++
+  - pkg-config
+  - curl
+  - doxygen
+
+data_mount_point: /data
+data_filesystem: ext4
+data_mount_options: "defaults,noatime"
+
+lvm_volume_group_name: "data_vg"
+lvm_data_volume_name: "data_lv"
+lvm_data_volume_size: "80%VG"
+
+# Passwords from environment
+admin_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default(omit) }}"
+secondary_password: "{{ lookup('env', 'SECONDARY_PASSWORD') | default(omit) }}"
+
+# NFS Configuration
+nfs_share_server: "10.0.40.2"
+nfs_share_path: "/media"
+nfs_mount_point: "/data/media"
+
+role_pip_packages:
+  - setuptools
+  - pynvim
+
+# Other secrets
+github_personal_access_token: "{{ lookup('env', 'GITHUB_PERSONAL_ACCESS_TOKEN') | default(omit) }}"

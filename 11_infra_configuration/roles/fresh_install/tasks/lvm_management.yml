@@ -1,0 +1,36 @@
+---
+- name: Install LVM management tools
+  ansible.builtin.apt:
+    name:
+      - lvm2
+      - parted
+      - gdisk
+    state: present
+    update_cache: true
+
+- name: Create LVM management script for future extensions
+  ansible.builtin.template:
+    src: extend_lvm.sh.j2
+    dest: /usr/local/bin/extend_lvm.sh
+    mode: '0755'
+    owner: root
+    group: root
+  when: not skip_storage_setup | default(false)
+
+- name: Display current LVM status
+  ansible.builtin.shell:
+    cmd: |
+      echo "=== Physical Volumes ==="
+      pvdisplay
+      echo "=== Volume Groups ==="
+      vgdisplay
+      echo "=== Logical Volumes ==="
+      lvdisplay
+  register: lvm_status
+  changed_when: false
+  when: not skip_storage_setup | default(false)
+
+- name: Show LVM status
+  ansible.builtin.debug:
+    var: lvm_status.stdout_lines
+  when: not skip_storage_setup | default(false)

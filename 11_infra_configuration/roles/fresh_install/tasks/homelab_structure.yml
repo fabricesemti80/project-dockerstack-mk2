@@ -1,0 +1,81 @@
+---
+- name: Create homelab directory structure
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0755'
+  loop:
+    - "/data/homelab"
+    - "/data/media"
+    - "/data/torrents"
+    - "/data/usenet"
+
+- name: Set directory permissions
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0755'
+    recurse: true
+  loop:
+    - "/data/homelab"
+    - "/data/media"
+    - "/data/torrents"
+    - "/data/usenet"
+
+- name: Set appropriate ACLs for all data directories
+  ansible.builtin.shell: |
+    setfacl -R -m u:{{ secondary_user }}:rwx {{ item }}
+    setfacl -R -m d:u:{{ secondary_user }}:rwx {{ item }}
+  ignore_errors: true
+  loop:
+    - "/data/homelab"
+    - "/data/media"
+    - "/data/torrents"
+    - "/data/usenet"
+  when: enable_acl_permissions | default(false) | bool
+  changed_when: true
+
+- name: Create README files for each directory
+  ansible.builtin.copy:
+    content: |
+      # {{ item.name }}
+
+      {{ item.description }}
+
+      Created by: Ansible homelab setup
+      Owner: {{ admin_user }}
+      Permissions: {{ secondary_user }} has full access
+
+      Directory structure managed by Ansible.
+      Do not modify this file manually.
+    dest: "{{ item.path }}/README.md"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0644'
+  loop:
+    - name: "Homelab Root"
+      path: "/data/homelab"
+      description: "Root directory for homelab services and configurations"
+    - name: "Media Directory"
+      path: "/data/media"
+      description: "All media content (movies, TV shows, videos)"
+    - name: "Torrents"
+      path: "/data/torrents"
+      description: "BitTorrent downloads and incomplete files"
+    - name: "Usenet"
+      path: "/data/usenet"
+      description: "Usenet downloads and processing"
+
+- name: Create .gitkeep files
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ item }}/.gitkeep"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0644'
+  loop:
+    - "/data/torrents"
+    - "/data/usenet"

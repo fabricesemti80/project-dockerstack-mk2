@@ -1,0 +1,42 @@
+=====================================================
+           HOMELAB {{ display_title | default(ansible_hostname | upper + ' SERVER') }}
+=====================================================
+
+System Information:
+   * Hostname: {{ ansible_hostname }}
+   * IP Address: {{ ansible_default_ipv4.address | default('N/A') }}
+   * OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+   * Kernel: {{ ansible_kernel }}
+   * Architecture: {{ ansible_architecture }}
+   * Uptime: {{ ansible_uptime_seconds | int // 3600 }}h {{ (ansible_uptime_seconds | int % 3600) // 60 }}m
+
+Storage Information:
+   * Root Disk: {{ (ansible_mounts | selectattr('mount', 'equalto', '/') | first).size_total | filesizeformat if ansible_mounts | selectattr('mount', 'equalto', '/') | list | length > 0 else 'N/A' }}
+     ({{ (ansible_mounts | selectattr('mount', 'equalto', '/') | first).size_available | filesizeformat if ansible_mounts | selectattr('mount', 'equalto', '/') | list | length > 0 else 'N/A' }} free)
+{% if ansible_mounts | selectattr('mount', 'equalto', '/data') | list | length > 0 %}
+   * Data Disk: {{ (ansible_mounts | selectattr('mount', 'equalto', '/data') | first).size_total | filesizeformat }}
+     ({{ (ansible_mounts | selectattr('mount', 'equalto', '/data') | first).size_available | filesizeformat }} free)
+{% endif %}
+   * Memory: {{ (ansible_memtotal_mb / 1024) | round(1) }}GB
+     ({{ (ansible_memfree_mb / 1024) | round(1) }}GB free)
+
+Network & Services:
+{% if install_webmin | default(true) | bool %}
+   * Webmin: https://{{ ansible_default_ipv4.address | default(ansible_host) }}:{{ webmin_port | default(10000) }}
+   * Usermin: https://{{ ansible_default_ipv4.address | default(ansible_host) }}:{{ usermin_port | default(20000) }}
+{% endif %}
+   * SSH Port: {{ ansible_port | default(22) }}
+
+WARNING: AUTHORIZED ACCESS ONLY
+    All activities are logged and monitored.
+    Unauthorized access is strictly prohibited.
+
+Quick Commands:
+   * sysinfo          - System overview
+   * lvm-status       - Storage status
+{% if install_webmin | default(true) | bool %}
+   * webmin-status    - Service status
+{% endif %}
+
+=====================================================
+Last updated: {{ ansible_date_time.iso8601 }}

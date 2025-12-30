@@ -1,0 +1,27 @@
+---
+- name: Ensure nfs-common is installed
+  ansible.builtin.apt:
+    name: nfs-common
+    state: present
+
+- name: Create media mount point
+  ansible.builtin.file:
+    path: "{{ nfs_mount_point }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0755'
+
+- name: Mount NFS share for media
+  ansible.posix.mount:
+    path: "{{ nfs_mount_point }}"
+    src: "{{ nfs_share_server }}:{{ nfs_share_path }}"
+    fstype: nfs
+    opts: defaults,soft,intr,rsize=8192,wsize=8192
+    state: mounted
+  register: nfs_mount_result
+
+- name: Display NFS mount status
+  ansible.builtin.debug:
+    msg: "NFS share {{ nfs_share_server }}:{{ nfs_share_path }} mounted on {{ nfs_mount_point }}"
+  when: nfs_mount_result is changed

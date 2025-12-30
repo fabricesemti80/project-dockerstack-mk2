@@ -1,0 +1,67 @@
+---
+- name: Locale setup
+  include_tasks: locale_setup.yml
+  tags: [always, locale]
+
+- name: User management
+  include_tasks: user_management.yml
+  tags: [always, users]
+
+- name: System updates
+  include_tasks: system_update.yml
+  tags: [always, system, updates]
+
+- name: Package installation
+  include_tasks: package_installation.yml
+  tags: [always, packages]
+
+- name: Storage setup
+  include_tasks: storage_setup.yml
+  tags: [storage, lvm]
+  when: install_storage | default(true) | bool
+
+- name: LVM management
+  include_tasks: lvm_management.yml
+  tags: [storage, lvm]
+  when: install_storage | default(true) | bool
+
+- name: NFS Media Mount
+  include_tasks: nfs_mount.yml
+  tags: [storage, nfs, media]
+  when: 
+    - inventory_hostname in groups['proxmox_vms']
+    - install_storage | default(true) | bool
+
+- name: Python setup
+  include_tasks: python_setup.yml
+  tags: [always, python]
+
+- name: Docker setup
+  include_tasks: docker_setup.yml
+  tags: [docker]
+  when: install_docker | default(true) | bool
+
+- name: ZSH setup
+  include_tasks: zsh_setup.yml
+  tags: [zsh]
+  when: install_zsh | default(true) | bool
+
+- name: Homelab directory structure
+  include_tasks: homelab_structure.yml
+  tags: [homelab, directories]
+  when: create_homelab_structure | default(true) | bool
+
+- name: Neovim installation
+  include_tasks: neovim_installation.yml
+  tags: [neovim]
+  when: install_neovim | default(true) | bool
+
+- name: Webmin and Usermin setup
+  include_tasks: webmin_setup.yml
+  tags: [webmin, usermin]
+  when: install_webmin | default(true) | bool
+
+- name: SSH banner setup
+  include_tasks: ssh_banner_setup.yml
+  tags: [ssh, banner]
+  when: install_ssh_banner | default(true) | bool

@@ -19,3 +19,8 @@ override.tf.json
 *.env
 id_rsa
 id_rsa.pub
+
+# Ansible roles
+11_infra_configuration/roles/geerlingguy.docker/**
+11_infra_configuration/roles/geerlingguy.pip/**
+11_infra_configuration/roles/artis3n.tailscale/**

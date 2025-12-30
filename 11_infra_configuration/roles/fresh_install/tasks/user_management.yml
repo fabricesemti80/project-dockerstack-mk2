@@ -1,0 +1,106 @@
+---
+- name: Check if admin user exists
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ admin_user }}"
+  register: admin_user_info
+  failed_when: false
+
+- name: Check if secondary user exists
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ secondary_user }}"
+  register: secondary_user_info
+  failed_when: false
+
+- name: Ensure admin user group exists
+  ansible.builtin.group:
+    name: "{{ admin_user }}"
+    state: present
+
+- name: Ensure secondary user group exists
+  ansible.builtin.group:
+    name: "{{ secondary_user }}"
+    state: present
+
+- name: Create or update primary admin user
+  ansible.builtin.user:
+    name: "{{ admin_user }}"
+    password: "{{ admin_password | default(omit) | password_hash('sha512') if admin_password is defined else omit }}"
+    groups:
+      - "{{ admin_user }}"
+      - sudo
+      - adm
+    state: present
+    shell: /bin/bash
+    system: false
+    create_home: true
+    home: "/home/{{ admin_user }}"
+    update_password: "{{ 'always' if admin_password is defined else 'on_create' }}"
+    comment: "Primary Administrator"
+    expires: -1
+    append: true
+
+- name: Create or update secondary user
+  ansible.builtin.user:
+    name: "{{ secondary_user }}"
+    password: "{{ secondary_password | default(omit) | password_hash('sha512') if secondary_password is defined else omit }}"
+    groups:
+      - "{{ secondary_user }}"
+      - sudo
+    state: present
+    shell: /bin/bash
+    system: false
+    create_home: true
+    home: "/home/{{ secondary_user }}"
+    update_password: "{{ 'always' if secondary_password is defined else 'on_create' }}"
+    comment: "Secondary User"
+    expires: -1
+    append: true
+
+- name: Parse SSH Public Keys
+  ansible.builtin.set_fact:
+    parsed_ssh_keys: >-
+      {% if ssh_public_keys is string %}
+        {% if ssh_public_keys.startswith('[') %}
+          {{ ssh_public_keys | from_json }}
+        {% elif ',' in ssh_public_keys %}
+          {{ ssh_public_keys.split(',') | map('trim') | list }}
+        {% else %}
+          {{ [ssh_public_keys] }}
+        {% endif %}
+      {% else %}
+        {{ ssh_public_keys | default([]) }}
+      {% endif %}
+
+- name: Add public keys to admin user authorized_keys
+  ansible.builtin.authorized_key:
+    user: "{{ admin_user }}"
+    state: present
+    key: "{{ item }}"
+    exclusive: false
+  loop: "{{ parsed_ssh_keys }}"
+  when: parsed_ssh_keys | length > 0
+
+- name: Add public keys to secondary user authorized_keys
+  ansible.builtin.authorized_key:
+    user: "{{ secondary_user }}"
+    state: present
+    key: "{{ item }}"
+    exclusive: false
+  loop: "{{ parsed_ssh_keys }}"
+  when: parsed_ssh_keys | length > 0
+
+- name: Add admin user to sudoers file with NOPASSWD
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    regexp: '^{{ admin_user }}\s+'
+    line: "{{ admin_user }} ALL=(ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"
+
+- name: Add secondary user to sudoers
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers
+    regexp: '^{{ secondary_user }}\s+'
+    line: "{{ secondary_user }} ALL=(ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"

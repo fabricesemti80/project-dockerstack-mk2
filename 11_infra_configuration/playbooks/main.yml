@@ -1,0 +1,93 @@
+---
+- name: Homelab Infrastructure Configuration
+  hosts: all
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: "Install prerequisites for repo setup"
+      ansible.builtin.apt:
+        name:
+          - gnupg
+          - curl
+          - apt-transport-https
+          - ca-certificates
+          - acl
+          - python3-pip
+          - python3-packaging
+        state: present
+        update_cache: true
+      tags: [always]
+
+    - name: "Get Tailscale interface information"
+      ansible.builtin.setup:
+        filter: ansible_tailscale0
+      tags: [docker, always]
+
+    - name: "Create Docker systemd override directory"
+      ansible.builtin.file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      tags: [docker]
+
+    - name: "Configure Docker systemd override to remove CLI flags"
+      ansible.builtin.copy:
+        content: |
+          [Service]
+          ExecStart=
+          ExecStart=/usr/bin/dockerd
+        dest: /etc/systemd/system/docker.service.d/override.conf
+        owner: root
+        group: root
+        mode: '0644'
+      tags: [docker]
+      notify: "Reload systemd"
+
+  roles:
+    - role: artis3n.tailscale
+      vars:
+        tailscale_authkey: "{{ lookup('env', 'TAILSCALE_AUTH_KEY') }}"
+        tailscale_args: "--accept-routes=false --ssh"
+      ignore_errors: "{{ ansible_check_mode }}"
+      tags: [tailscale]
+
+    - role: geerlingguy.pip
+      vars:
+        pip_package: python3-pip
+        pip_install_packages:
+          - setuptools
+          - pynvim
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - role: geerlingguy.docker
+      vars:
+        docker_users:
+          - "{{ admin_user }}"
+          - "{{ secondary_user }}"
+        docker_daemon_options:
+          mtu: 1280
+          hosts:
+            - "tcp://{{ ansible_tailscale0.ipv4.address | default('127.0.0.1') }}:2376"
+            - "unix:///var/run/docker.sock"
+          log-driver: "json-file"
+          log-opts:
+            max-file: "3"
+            max-size: "10m"
+          storage-driver: "overlay2"
+          live-restore: false
+          userland-proxy: false
+          default-address-pools:
+            - base: "10.20.0.0/16"
+              size: 24
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - role: fresh_install
+      ignore_errors: "{{ ansible_check_mode }}"
+
+  handlers:
+    - name: "Reload systemd"
+      ansible.builtin.systemd:
+        daemon_reload: true

@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: hacstac
+  description: Fresh installation setup for homelab servers
+  company: personal
+  license: MIT
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+
+dependencies: []
