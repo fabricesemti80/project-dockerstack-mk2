@@ -4,10 +4,10 @@
 version: "3.9"
 
 services:
-  hub:
+  beszel:
     image: henrygd/beszel:latest
     volumes:
-      - beszel_data:/beszel_data
+      - /data/beszel_data:/beszel_data
     networks:
       - proxy
     deploy:
@@ -24,11 +24,12 @@ services:
         - "traefik.http.routers.beszel.tls.certresolver=cloudflare"
         - "traefik.http.services.beszel.loadbalancer.server.port=8090"
 
-  agent:
+  beszel-agent:
     image: henrygd/beszel-agent:latest
     environment:
       - PORT=45876
       - KEY=${BESZEL_AGENT_KEY}
+      # Push mode configuration (recommended)
       - TOKEN=${BESZEL_AGENT_TOKEN}
       - HUB_URL=https://beszel.${DOMAIN}
     volumes:
@@ -42,9 +43,6 @@ services:
       mode: global
       placement:
         constraints: [node.platform.os == linux]
-
-volumes:
-  beszel_data:
 
 networks:
   proxy:
