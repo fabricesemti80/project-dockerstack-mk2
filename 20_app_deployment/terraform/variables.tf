@@ -132,7 +132,23 @@ variable "beszel_agent_key" {
 
 
 
+
+
+
+
+
+
+
+
   type        = string
+
+
+
+
+
+
+
+
 
 
 
@@ -148,6 +164,14 @@ variable "beszel_agent_key" {
 
 
 
+
+
+
+
+
+
+
+
   sensitive   = true
 
 
@@ -156,7 +180,23 @@ variable "beszel_agent_key" {
 
 
 
+
+
+
+
+
+
+
+
   default     = ""
+
+
+
+
+
+
+
+
 
 
 
@@ -180,7 +220,151 @@ variable "beszel_agent_key" {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+variable "beszel_agent_token" {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  type        = string
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  description = "Beszel Agent Token (for push mode)"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  sensitive   = true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  default     = ""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 variable "repository_url" {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

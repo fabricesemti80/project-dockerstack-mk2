@@ -27,6 +27,7 @@ resource "portainer_stack" "traefik" {
   repository_url            = var.repository_url
   repository_reference_name = var.repository_branch
   file_path_in_repository   = "docker/traefik/traefik-stack.yml"
+  force_update              = true
 
   env {
     name  = "CLOUDFLARE_API_TOKEN"
@@ -52,6 +53,7 @@ resource "portainer_stack" "whoami" {
   repository_url            = var.repository_url
   repository_reference_name = var.repository_branch
   file_path_in_repository   = "docker/traefik/whoami-stack.yml"
+  force_update              = true
 
   env {
     name  = "DOMAIN"
@@ -69,6 +71,7 @@ resource "portainer_stack" "cloudflared" {
   repository_url            = var.repository_url
   repository_reference_name = var.repository_branch
   file_path_in_repository   = "docker/cloudflared/cloudflared-stack.yml"
+  force_update              = true
 
   env {
     name  = "CLOUDFLARE_TUNNEL_TOKEN"
@@ -86,6 +89,7 @@ resource "portainer_stack" "beszel" {
   repository_url            = var.repository_url
   repository_reference_name = var.repository_branch
   file_path_in_repository   = "docker/beszel/beszel-stack.yml"
+  force_update              = true
 
   env {
     name  = "DOMAIN"
@@ -95,6 +99,11 @@ resource "portainer_stack" "beszel" {
   env {
     name  = "BESZEL_AGENT_KEY"
     value = var.beszel_agent_key
+  }
+
+  env {
+    name  = "BESZEL_AGENT_TOKEN"
+    value = var.beszel_agent_token
   }
 
   depends_on = [portainer_stack.traefik]
