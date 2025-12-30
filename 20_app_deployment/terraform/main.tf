@@ -29,6 +29,7 @@ resource "portainer_stack" "traefik" {
   file_path_in_repository   = "docker/traefik/traefik-stack.yml"
   force_update              = true
   pull_image                = true
+  update_interval           = "5m"
 
   env {
     name  = "CLOUDFLARE_API_TOKEN"
@@ -56,6 +57,7 @@ resource "portainer_stack" "whoami" {
   file_path_in_repository   = "docker/traefik/whoami-stack.yml"
   force_update              = true
   pull_image                = true
+  update_interval           = "5m"
 
   env {
     name  = "DOMAIN"
@@ -75,6 +77,7 @@ resource "portainer_stack" "cloudflared" {
   file_path_in_repository   = "docker/cloudflared/cloudflared-stack.yml"
   force_update              = true
   pull_image                = true
+  update_interval           = "5m"
 
   env {
     name  = "CLOUDFLARE_TUNNEL_TOKEN"
@@ -94,6 +97,7 @@ resource "portainer_stack" "beszel" {
   file_path_in_repository   = "docker/beszel/beszel-stack.yml"
   force_update              = true
   pull_image                = true
+  update_interval           = "5m"
 
   env {
     name  = "DOMAIN"
