@@ -473,6 +473,9 @@ docker service logs cloudflared_cloudflared
 - [Hetzner Cloud API](https://docs.hetzner.cloud/)
 - [Proxmox VE Documentation](https://pve.proxmox.com/pve-docs/)
 
+*Inspirations / thanks*
+- [homelab-media-stack](https://github.com/AkashRajvanshi/homelab-media-stack)
+
 ## License
 
 This project is for personal/homelab use.

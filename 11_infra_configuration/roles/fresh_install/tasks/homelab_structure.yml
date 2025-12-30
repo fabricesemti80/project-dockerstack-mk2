@@ -59,12 +59,45 @@
   when: item.path != "/data/media"
 
 - name: Create .gitkeep files
+
   ansible.builtin.copy:
+
     content: ""
+
     dest: "{{ item }}/.gitkeep"
+
     owner: "{{ admin_user }}"
+
     group: "{{ admin_user }}"
+
     mode: '0644'
+
   loop:
+
     - "/data/torrents"
+
     - "/data/usenet"
+
+
+
+- name: Create Jellyfin directories on NFS
+
+  ansible.builtin.file:
+
+    path: "{{ item }}"
+
+    state: directory
+
+    owner: 1000
+
+    group: 1000
+
+    mode: '0755'
+
+  loop:
+
+    - "/data/media/config"
+
+    - "/data/media/config/jellyfin"
+
+    - "/data/media/config/jellyfin-cache"
