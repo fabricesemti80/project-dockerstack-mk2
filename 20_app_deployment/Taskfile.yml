@@ -1,6 +1,12 @@
 version: '3'
 
 tasks:
+  default:
+    desc: List all tasks
+    cmds:
+      - task --list
+    silent: true
+
   init:
     desc: Initialize Terraform
     dir: terraform
