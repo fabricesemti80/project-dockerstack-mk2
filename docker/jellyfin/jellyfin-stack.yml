@@ -1,4 +1,4 @@
-# Jellyfin - Media Server
+# Jellyfin - Media Server (Persistent Swarm Config)
 # https://jellyfin.org/
 
 version: "3.9"
@@ -9,20 +9,27 @@ services:
     networks:
       - proxy
     volumes:
-      - jellyfin-config:/config
-      - jellyfin-cache:/cache
+      # We use bind mounts to the NFS share for cluster-wide persistence
+      - type: bind
+        source: /data/media/config/jellyfin
+        target: /config
+      - type: bind
+        source: /data/media/config/jellyfin-cache
+        target: /cache
       - type: bind
         source: /data/media
         target: /media
         read_only: true
     ports:
-      # Direct local access via Swarm Ingress Mesh
       - target: 8096
         published: 8096
         protocol: tcp
         mode: ingress
     environment:
       - JELLYFIN_PublishedServerUrl=https://jellyfin.${DOMAIN}
+      # Map to your host user (fs) to avoid NFS permission issues
+      - PUID=1000
+      - PGID=1000
     deploy:
       mode: replicated
       replicas: 1
@@ -36,13 +43,8 @@ services:
         - "traefik.http.routers.jellyfin.entrypoints=websecure"
         - "traefik.http.routers.jellyfin.tls.certresolver=cloudflare"
         - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
-        # Increase timeout for large file uploads/metadata scanning if needed
         - "traefik.http.routers.jellyfin.middlewares=jellyfin-compress"
         - "traefik.http.middlewares.jellyfin-compress.compress=true"
-
-volumes:
-  jellyfin-config:
-  jellyfin-cache:
 
 networks:
   proxy:
