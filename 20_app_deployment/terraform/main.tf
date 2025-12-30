@@ -77,3 +77,25 @@ resource "portainer_stack" "cloudflared" {
 
   depends_on = [portainer_stack.traefik]
 }
+
+resource "portainer_stack" "beszel" {
+  endpoint_id               = var.endpoint_id
+  name                      = "beszel"
+  method                    = "repository"
+  deployment_type           = "swarm"
+  repository_url            = var.repository_url
+  repository_reference_name = var.repository_branch
+  file_path_in_repository   = "docker/beszel/beszel-stack.yml"
+
+  env {
+    name  = "DOMAIN"
+    value = var.apps_domain
+  }
+
+  env {
+    name  = "BESZEL_AGENT_KEY"
+    value = var.beszel_agent_key
+  }
+
+  depends_on = [portainer_stack.traefik]
+}

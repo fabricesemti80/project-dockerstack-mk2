@@ -80,7 +80,15 @@ variable "cloudflare_tunnel_token" {
 
 
 
+
+
+
+
   type        = string
+
+
+
+
 
 
 
@@ -88,7 +96,15 @@ variable "cloudflare_tunnel_token" {
 
 
 
+
+
+
+
   sensitive   = true
+
+
+
+
 
 
 
@@ -100,7 +116,79 @@ variable "cloudflare_tunnel_token" {
 
 
 
+
+
+
+
+
+
+
+
+variable "beszel_agent_key" {
+
+
+
+
+
+
+
+  type        = string
+
+
+
+
+
+
+
+  description = "Beszel Agent Public Key (from Hub)"
+
+
+
+
+
+
+
+  sensitive   = true
+
+
+
+
+
+
+
+  default     = ""
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 variable "repository_url" {
+
+
+
+
+
+
+
+
 
 
 

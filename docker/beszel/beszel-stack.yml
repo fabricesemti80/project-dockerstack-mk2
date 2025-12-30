@@ -1,0 +1,50 @@
+# Beszel - Lightweight server monitoring
+# https://www.beszel.dev/
+
+version: "3.9"
+
+services:
+  hub:
+    image: henrygd/beszel:latest
+    volumes:
+      - beszel_data:/beszel_data
+    networks:
+      - proxy
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.leader == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.beszel.rule=Host(`beszel.${DOMAIN}`)"
+        - "traefik.http.routers.beszel.entrypoints=websecure"
+        - "traefik.http.routers.beszel.tls.certresolver=cloudflare"
+        - "traefik.http.services.beszel.loadbalancer.server.port=8090"
+
+  agent:
+    image: henrygd/beszel-agent:latest
+    environment:
+      - KEY=${BESZEL_AGENT_KEY}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Uncomment the next line to monitor host disks
+      # - /:/host:ro
+    ports:
+      - target: 45876
+        published: 45876
+        protocol: tcp
+        mode: host
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.platform.os == linux]
+
+volumes:
+  beszel_data:
+
+networks:
+  proxy:
+    external: true

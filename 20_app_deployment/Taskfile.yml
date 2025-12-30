@@ -17,16 +17,16 @@ tasks:
     desc: Plan Terraform changes
     dir: terraform
     cmds:
-      - doppler run -- sh -c 'export TF_VAR_portainer_access_token="$PORTAINER_ACCESS_TOKEN" && export TF_VAR_cloudflare_api_token="$CLOUDFLARE_API_TOKEN" && export TF_VAR_cloudflare_tunnel_token="$CLOUDFLARE_TUNNEL_TOKEN" && export TF_VAR_acme_email="${ACME_EMAIL:-$EMAIL}" && export TF_VAR_apps_domain="$DOMAIN" && terraform plan'
+      - doppler run -- sh -c 'export TF_VAR_portainer_access_token="$PORTAINER_ACCESS_TOKEN" && export TF_VAR_cloudflare_api_token="$CLOUDFLARE_API_TOKEN" && export TF_VAR_cloudflare_tunnel_token="$CLOUDFLARE_TUNNEL_TOKEN" && export TF_VAR_acme_email="${ACME_EMAIL:-$EMAIL}" && export TF_VAR_apps_domain="$DOMAIN" && export TF_VAR_beszel_agent_key="$BESZEL_AGENT_KEY" && terraform plan'
 
   apply:
     desc: Apply Terraform changes
     dir: terraform
     cmds:
-      - doppler run -- sh -c 'export TF_VAR_portainer_access_token="$PORTAINER_ACCESS_TOKEN" && export TF_VAR_cloudflare_api_token="$CLOUDFLARE_API_TOKEN" && export TF_VAR_cloudflare_tunnel_token="$CLOUDFLARE_TUNNEL_TOKEN" && export TF_VAR_acme_email="${ACME_EMAIL:-$EMAIL}" && export TF_VAR_apps_domain="$DOMAIN" && terraform apply -auto-approve'
+      - doppler run -- sh -c 'export TF_VAR_portainer_access_token="$PORTAINER_ACCESS_TOKEN" && export TF_VAR_cloudflare_api_token="$CLOUDFLARE_API_TOKEN" && export TF_VAR_cloudflare_tunnel_token="$CLOUDFLARE_TUNNEL_TOKEN" && export TF_VAR_acme_email="${ACME_EMAIL:-$EMAIL}" && export TF_VAR_apps_domain="$DOMAIN" && export TF_VAR_beszel_agent_key="$BESZEL_AGENT_KEY" && terraform apply -auto-approve'
 
   destroy:
     desc: Destroy Terraform resources
     dir: terraform
     cmds:
-      - doppler run -- sh -c 'export TF_VAR_portainer_access_token="$PORTAINER_ACCESS_TOKEN" && export TF_VAR_cloudflare_api_token="$CLOUDFLARE_API_TOKEN" && export TF_VAR_cloudflare_tunnel_token="$CLOUDFLARE_TUNNEL_TOKEN" && export TF_VAR_acme_email="${ACME_EMAIL:-$EMAIL}" && export TF_VAR_apps_domain="$DOMAIN" && terraform destroy -auto-approve'
+      - doppler run -- sh -c 'export TF_VAR_portainer_access_token="$PORTAINER_ACCESS_TOKEN" && export TF_VAR_cloudflare_api_token="$CLOUDFLARE_API_TOKEN" && export TF_VAR_cloudflare_tunnel_token="$CLOUDFLARE_TUNNEL_TOKEN" && export TF_VAR_acme_email="${ACME_EMAIL:-$EMAIL}" && export TF_VAR_apps_domain="$DOMAIN" && export TF_VAR_beszel_agent_key="$BESZEL_AGENT_KEY" && terraform destroy -auto-approve'
