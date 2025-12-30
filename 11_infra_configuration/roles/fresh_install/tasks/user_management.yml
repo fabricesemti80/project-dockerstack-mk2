@@ -60,18 +60,7 @@
 
 - name: Parse SSH Public Keys
   ansible.builtin.set_fact:
-    parsed_ssh_keys: >-
-      {% if ssh_public_keys is string %}
-        {% if ssh_public_keys.startswith('[') %}
-          {{ ssh_public_keys | from_json }}
-        {% elif ',' in ssh_public_keys %}
-          {{ ssh_public_keys.split(',') | map('trim') | list }}
-        {% else %}
-          {{ [ssh_public_keys] }}
-        {% endif %}
-      {% else %}
-        {{ ssh_public_keys | default([]) }}
-      {% endif %}
+    parsed_ssh_keys: "{{ ssh_public_keys | from_json if (ssh_public_keys is string and ssh_public_keys.startswith('[')) else ([ssh_public_keys] if ssh_public_keys is string else (ssh_public_keys | default([]))) }}"
 
 - name: Add public keys to admin user authorized_keys
   ansible.builtin.authorized_key:

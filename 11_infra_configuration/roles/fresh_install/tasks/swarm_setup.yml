@@ -1,0 +1,93 @@
+---
+# Docker Swarm setup - Bootstrap and Labels
+# Dependent on Tailscale for communication
+
+- name: "Verify Tailscale is running"
+  ansible.builtin.systemd:
+    name: tailscaled
+    state: started
+  tags: [swarm, tailscale]
+
+- name: "Get Tailscale interface information"
+  ansible.builtin.setup:
+    filter: ansible_tailscale0
+  tags: [swarm, tailscale]
+
+- name: "Fail if Tailscale interface not found"
+  ansible.builtin.fail:
+    msg: "Tailscale interface (tailscale0) not found on {{ inventory_hostname }}. Ensure Tailscale is properly configured."
+  when: ansible_facts['tailscale0'] is not defined
+  tags: [swarm, tailscale]
+
+- name: "Check if node is already part of a Docker Swarm"
+  ansible.builtin.command: docker info --format '{{ "{{" }} .Swarm.LocalNodeState{{ "}}" }}'
+  register: swarm_state
+  changed_when: false
+  check_mode: no
+  tags: [swarm]
+
+# Bootstrap on the first manager (dkr-srv-0 in cloud_vms)
+- name: "Bootstrap Docker Swarm on leader"
+  ansible.builtin.command: |
+    docker swarm init \
+      --advertise-addr {{ ansible_facts['tailscale0'].ipv4.address }} \
+      --listen-addr {{ ansible_facts['tailscale0'].ipv4.address }}:2377
+  when:
+    - inventory_hostname == groups['cloud_vms'][0]
+    - swarm_state.stdout != 'active'
+  tags: [swarm]
+
+# Get join tokens
+- name: "Get manager join token"
+  ansible.builtin.command: docker swarm join-token -q manager
+  register: manager_join_token
+  when:
+    - inventory_hostname == groups['cloud_vms'][0]
+  failed_when: false
+  changed_when: false
+  check_mode: no
+  tags: [swarm]
+
+- name: "Set join token fact"
+  ansible.builtin.set_fact:
+    swarm_manager_token: "{{ manager_join_token.stdout | default('') }}"
+  when: inventory_hostname == groups['cloud_vms'][0]
+  tags: [swarm]
+
+# Join other nodes
+- name: "Join other nodes to the Docker Swarm"
+  ansible.builtin.command: |
+    docker swarm join \
+      --token {{ hostvars[groups['cloud_vms'][0]].swarm_manager_token }} \
+      {{ hostvars[groups['cloud_vms'][0]].ansible_facts['tailscale0'].ipv4.address }}:2377
+  when:
+    - inventory_hostname != groups['cloud_vms'][0]
+    - swarm_state.stdout != 'active'
+    - hostvars[groups['cloud_vms'][0]].swarm_manager_token | default('') != ''
+  tags: [swarm]
+
+# Node Labeling
+- name: "Apply node labels"
+  run_once: true
+  delegate_to: "{{ groups['cloud_vms'][0] }}"
+  block:
+    - name: "Apply leader and cloud labels to cloud nodes"
+      ansible.builtin.command: "docker node update --label-add leader=true --label-add cloud=true {{ item }}"
+      loop: "{{ groups['cloud_vms'] }}"
+      changed_when: true
+      tags: [swarm, labels]
+
+    - name: "Apply local and proxmox labels to proxmox nodes"
+      ansible.builtin.command: "docker node update --label-add local=true --label-add proxmox=true {{ item }}"
+      loop: "{{ groups['proxmox_vms'] }}"
+      changed_when: true
+      tags: [swarm, labels]
+
+    - name: "Apply manager labels to all managers"
+      ansible.builtin.command: "docker node update --label-add role=manager {{ item }}"
+      loop: "{{ groups['swarm_managers'] }}"
+      changed_when: true
+      tags: [swarm, labels]
+  when: 
+    - not ansible_check_mode
+    - swarm_state.stdout == 'active' or (inventory_hostname == groups['cloud_vms'][0] and swarm_state.stdout == 'active')

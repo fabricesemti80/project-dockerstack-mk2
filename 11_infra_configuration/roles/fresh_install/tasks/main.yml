@@ -41,6 +41,11 @@
   tags: [docker]
   when: install_docker | default(true) | bool
 
+- name: Docker Swarm setup
+  include_tasks: swarm_setup.yml
+  tags: [swarm, docker]
+  when: install_docker | default(true) | bool
+
 - name: ZSH setup
   include_tasks: zsh_setup.yml
   tags: [zsh]

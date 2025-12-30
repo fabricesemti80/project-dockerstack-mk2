@@ -8,10 +8,6 @@
   ansible.builtin.set_fact:
     data_disks: "{{ ansible_facts['devices'] | dict2items | selectattr('key', 'match', '^sd[a-z]$|^nvme[0-9]+n[0-9]+$|^xvd[a-z]$') | rejectattr('key', 'equalto', 'vda') | selectattr('value.partitions', 'equalto', {}) | map(attribute='key') | list }}"
 
-- name: Debug detected data disks
-  ansible.builtin.debug:
-    msg: "Detected unpartitioned data disks: {{ data_disks }}"
-
 - name: Set skip flag if no disks found
   ansible.builtin.set_fact:
     skip_storage_setup: "{{ data_disks | length == 0 }}"
@@ -21,18 +17,16 @@
   block:
     - name: Select the largest available disk
       ansible.builtin.set_fact:
-        selected_data_disk_name: "{{ data_disks[0] }}" # Simplest approach for first selection
+        selected_data_disk_name: "{{ data_disks[0] }}"
 
     - name: Check if volume group exists
-      ansible.builtin.shell: "vgdisplay {{ lvm_volume_group_name }}"
+      ansible.builtin.shell: "vgdisplay {{ lvm_volume_group_name }} || true"
       register: vg_exists
-      failed_when: false
       changed_when: false
 
     - name: Check if logical volume exists
-      ansible.builtin.shell: "lvdisplay /dev/{{ lvm_volume_group_name }}/{{ lvm_data_volume_name }}"
+      ansible.builtin.shell: "lvdisplay /dev/{{ lvm_volume_group_name }}/{{ lvm_data_volume_name }} || true"
       register: lv_exists
-      failed_when: false
       changed_when: false
 
     - name: Create physical volume and volume group
@@ -40,7 +34,7 @@
         vg: "{{ lvm_volume_group_name }}"
         pvs: "/dev/{{ selected_data_disk_name }}"
         state: present
-      when: vg_exists.rc != 0
+      when: "'not found' in vg_exists.stdout or vg_exists.rc != 0"
 
     - name: Create logical volume for data
       community.general.lvol:
@@ -48,12 +42,11 @@
         lv: "{{ lvm_data_volume_name }}"
         size: "{{ lvm_data_volume_size }}"
         state: present
-      when: lv_exists.rc != 0
+      when: "'not found' in lv_exists.stdout or lv_exists.rc != 0"
 
     - name: Check if filesystem exists
-      ansible.builtin.shell: "blkid /dev/{{ lvm_volume_group_name }}/{{ lvm_data_volume_name }}"
+      ansible.builtin.shell: "blkid /dev/{{ lvm_volume_group_name }}/{{ lvm_data_volume_name }} || true"
       register: fs_exists
-      failed_when: false
       changed_when: false
 
     - name: Create filesystem
@@ -61,7 +54,7 @@
         fstype: "{{ data_filesystem }}"
         dev: "/dev/{{ lvm_volume_group_name }}/{{ lvm_data_volume_name }}"
         state: present
-      when: fs_exists.rc != 0
+      when: fs_exists.stdout == ""
 
     - name: Create mount point directory
       ansible.builtin.file:
