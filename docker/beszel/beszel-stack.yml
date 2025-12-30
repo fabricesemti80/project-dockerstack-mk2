@@ -28,10 +28,9 @@ services:
     image: henrygd/beszel-agent:latest
     environment:
       - KEY=${BESZEL_AGENT_KEY}
+      - HUB_URL=https://beszel.${DOMAIN}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # Uncomment the next line to monitor host disks
-      # - /:/host:ro
     ports:
       - target: 45876
         published: 45876
