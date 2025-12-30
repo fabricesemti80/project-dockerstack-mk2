@@ -12,7 +12,15 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 5.0"
     }
+    doppler = {
+      source  = "dopplerhq/doppler"
+      version = "~> 1.0"
+    }
   }
+}
+
+provider "doppler" {
+  # Value will be passed via DOPPLER_TOKEN env var in Taskfile
 }
 
 provider "hcloud" {

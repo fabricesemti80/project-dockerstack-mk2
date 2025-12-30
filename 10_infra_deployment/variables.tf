@@ -16,6 +16,16 @@ variable "ci_user" {
   type        = string
 }
 
+variable "doppler_project" {
+  description = "The Doppler project name"
+  type        = string
+}
+
+variable "doppler_config" {
+  description = "The Doppler config name"
+  type        = string
+}
+
 # --- Hetzner Cloud ---
 
 variable "HCLOUD_TOKEN" {

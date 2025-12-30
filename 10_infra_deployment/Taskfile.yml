@@ -20,6 +20,7 @@ tasks:
           set -e
           ./generate_vars.sh
           trap "rm -f .terraform.tfvars.json" EXIT
+          export DOPPLER_TOKEN="$DOPPLER_TF_SRV_TOKEN"
           terraform plan -var-file=".terraform.tfvars.json"
         '
 
@@ -31,6 +32,7 @@ tasks:
           set -e
           ./generate_vars.sh
           trap "rm -f .terraform.tfvars.json" EXIT
+          export DOPPLER_TOKEN="$DOPPLER_TF_SRV_TOKEN"
           terraform apply -var-file=".terraform.tfvars.json" -auto-approve
         '
 
@@ -42,6 +44,7 @@ tasks:
           set -e
           ./generate_vars.sh
           trap "rm -f .terraform.tfvars.json" EXIT
+          export DOPPLER_TOKEN="$DOPPLER_TF_SRV_TOKEN"
           terraform destroy -var-file=".terraform.tfvars.json" -auto-approve
         '
 

@@ -81,9 +81,10 @@ locals {
   }))
 }
 
-# Output the Tunnel Token to a local .env file for Docker/Portainer use
-resource "local_file" "tunnel_env" {
-  content         = "CLOUDFLARE_TUNNEL_TOKEN=${local.CLOUDFLARE_TUNNEL_TOKEN}"
-  filename        = "${path.module}/../docker/cloudflared/.env"
-  file_permission = "0600"
+# Output the Tunnel Token to Doppler for Docker/Portainer use
+resource "doppler_secret" "cloudflare_tunnel_token" {
+  project = var.doppler_project
+  config  = var.doppler_config
+  name    = "CLOUDFLARE_TUNNEL_TOKEN"
+  value   = local.CLOUDFLARE_TUNNEL_TOKEN
 }
