@@ -31,6 +31,7 @@ resource "portainer_stack" "traefik" {
   pull_image                = true
   prune                     = true
   update_interval           = "5m"
+  stack_webhook             = true
 
   env {
     name  = "CLOUDFLARE_API_TOKEN"
@@ -60,6 +61,7 @@ resource "portainer_stack" "whoami" {
   pull_image                = true
   prune                     = true
   update_interval           = "5m"
+  stack_webhook             = true
 
   env {
     name  = "DOMAIN"
@@ -81,6 +83,7 @@ resource "portainer_stack" "cloudflared" {
   pull_image                = true
   prune                     = true
   update_interval           = "5m"
+  stack_webhook             = true
 
   env {
     name  = "CLOUDFLARE_TUNNEL_TOKEN"
@@ -102,6 +105,7 @@ resource "portainer_stack" "beszel" {
   pull_image                = true
   prune                     = true
   update_interval           = "5m"
+  stack_webhook             = true
 
   env {
     name  = "DOMAIN"
