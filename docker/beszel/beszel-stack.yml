@@ -29,16 +29,20 @@ services:
 
   beszel-agent:
     image: henrygd/beszel-agent:latest
-    # Host network is required for accurate host metrics in Swarm
-    network_mode: host
+    # In Swarm, host mode is best achieved via ports
+    ports:
+      - target: 45876
+        published: 45876
+        protocol: tcp
+        mode: host
     environment:
       - LISTEN=45876
-      # Using only TOKEN and HUB_URL for push mode
+      - KEY=${BESZEL_AGENT_KEY}
       - TOKEN=${BESZEL_AGENT_TOKEN}
       - HUB_URL=https://beszel.${DOMAIN}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - beszel_agent_data:/var/lib/beszel-agent
+      - /:/host:ro # Mount host root to monitor host disks
     deploy:
       mode: global
       placement:
@@ -51,7 +55,6 @@ volumes:
       type: none
       o: bind
       device: /data/beszel_data
-  beszel_agent_data:
 
 networks:
   proxy:
