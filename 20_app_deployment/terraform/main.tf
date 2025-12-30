@@ -122,5 +122,10 @@ resource "portainer_stack" "beszel" {
     value = var.beszel_agent_token
   }
 
+  env {
+    name  = "LAST_UPDATE"
+    value = "2025-12-30T17:45:00Z"
+  }
+
   depends_on = [portainer_stack.traefik]
 }

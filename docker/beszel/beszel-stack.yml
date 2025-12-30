@@ -12,8 +12,6 @@ services:
       - beszel_data:/beszel_data
     networks:
       - proxy
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     deploy:
       mode: replicated
       replicas: 1
@@ -31,17 +29,21 @@ services:
 
   beszel-agent:
     image: henrygd/beszel-agent:latest
+    # We keep host ports for host metrics accuracy
     ports:
       - target: 45876
         published: 45876
         protocol: tcp
         mode: host
     environment:
-      LISTEN: 45876
+      LISTEN: 0.0.0.0:45876  # Changed from just the port
+      # LISTEN: 45876
       KEY: ${BESZEL_AGENT_KEY}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /:/host:ro
+    networks:
+      - proxy # Add to proxy network so Hub can reach it internally
     deploy:
       mode: global
       placement:
