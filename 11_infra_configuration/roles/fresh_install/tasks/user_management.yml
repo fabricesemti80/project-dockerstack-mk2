@@ -58,9 +58,13 @@
     expires: -1
     append: true
 
-- name: Parse SSH Public Keys
+- name: Normalize SSH Public Keys to list
   ansible.builtin.set_fact:
-    parsed_ssh_keys: "{{ ssh_public_keys | from_json if (ssh_public_keys is string and ssh_public_keys.startswith('[')) else ([ssh_public_keys] if ssh_public_keys is string else (ssh_public_keys | default([]))) }}"
+    raw_ssh_keys: "{{ ssh_public_keys | from_json if (ssh_public_keys is string and ssh_public_keys.startswith('[')) else ([ssh_public_keys] if ssh_public_keys is string else (ssh_public_keys | default([]))) }}"
+
+- name: Clean and Filter SSH Public Keys
+  ansible.builtin.set_fact:
+    final_ssh_keys: "{{ raw_ssh_keys | select('string') | select('match', '^ssh-') | map('trim') | list }}"
 
 - name: Add public keys to admin user authorized_keys
   ansible.builtin.authorized_key:
@@ -68,8 +72,8 @@
     state: present
     key: "{{ item }}"
     exclusive: false
-  loop: "{{ parsed_ssh_keys }}"
-  when: parsed_ssh_keys | length > 0
+  loop: "{{ final_ssh_keys }}"
+  when: final_ssh_keys | length > 0
 
 - name: Add public keys to secondary user authorized_keys
   ansible.builtin.authorized_key:
@@ -77,8 +81,8 @@
     state: present
     key: "{{ item }}"
     exclusive: false
-  loop: "{{ parsed_ssh_keys }}"
-  when: parsed_ssh_keys | length > 0
+  loop: "{{ final_ssh_keys }}"
+  when: final_ssh_keys | length > 0
 
 - name: Add admin user to sudoers file with NOPASSWD
   ansible.builtin.lineinfile:

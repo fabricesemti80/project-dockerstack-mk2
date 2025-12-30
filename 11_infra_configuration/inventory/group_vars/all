@@ -1,0 +1,17 @@
+---
+# Shared variables pulled from Doppler/Environment
+admin_user: "{{ lookup('env', 'ANSIBLE_SSH_USER') | default('fs', true) }}"
+secondary_user: hacstac
+
+# Domains from environment
+apps_domain: "{{ lookup('env', 'DOMAIN') | default('media.thinkncode.biz', true) }}"
+domain_ops: "{{ lookup('env', 'DOMAIN_OPS') | default('', true) }}"
+domain_media: "{{ lookup('env', 'DOMAIN_MEDIA') | default('', true) }}"
+
+# Passwords from environment
+admin_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default(omit) }}"
+secondary_password: "{{ lookup('env', 'SECONDARY_PASSWORD') | default(omit) }}"
+portainer_admin_password: "{{ lookup('env', 'PORTAINER_ADMIN_PASSWORD') | default('portainer_admin_password', true) }}"
+
+# SSH Keys
+ssh_public_keys: "{{ lookup('env', 'TF_VAR_SSH_PUBLIC_KEYS') | default('[]', true) }}"

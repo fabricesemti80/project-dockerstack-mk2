@@ -12,6 +12,7 @@ Ensure the following secrets are available in your Doppler project. The `Taskfil
 | `TF_VAR_SSH_PUBLIC_KEYS` | JSON list of SSH public keys to authorize. |
 | `ADMIN_PASSWORD` | Password for the primary administrator user. |
 | `SECONDARY_PASSWORD` | Password for the secondary user (`hacstac`). |
+| `PORTAINER_ADMIN_PASSWORD` | Password for Portainer admin user initialization. |
 | `TAILSCALE_AUTH_KEY` | Tailscale Authentication Key for node linking. |
 | `GITHUB_PERSONAL_ACCESS_TOKEN` | (Optional) GitHub PAT for checking Neovim releases. |
 | `DOMAIN` | Main domain for applications (maps to `apps_domain`). |

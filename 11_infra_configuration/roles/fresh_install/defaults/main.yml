@@ -1,10 +1,5 @@
 ---
-# Use environment variables if available, otherwise fall back to defaults
-admin_user: "{{ lookup('env', 'ANSIBLE_SSH_USER') | default('fs', true) }}"
-secondary_user: hacstac
-
-# Pull SSH keys from environment (expected as JSON string)
-ssh_public_keys: "{{ lookup('env', 'TF_VAR_SSH_PUBLIC_KEYS') | default('[]', true) }}"
+# Role-specific defaults. Shared variables like admin_user are in group_vars/all
 
 install_neovim: true
 install_storage: true
@@ -20,11 +15,6 @@ webmin_port: 10000
 usermin_port: 20000
 webmin_bind_all_interfaces: true
 configure_webmin_reverse_proxy: true
-
-# Domains from environment
-apps_domain: "{{ lookup('env', 'DOMAIN') | default('media.thinkncode.biz', true) }}"
-domain_ops: "{{ lookup('env', 'DOMAIN_OPS') | default('', true) }}"
-domain_media: "{{ lookup('env', 'DOMAIN_MEDIA') | default('', true) }}"
 
 basic_packages:
   - zsh
@@ -80,10 +70,6 @@ lvm_volume_group_name: "data_vg"
 lvm_data_volume_name: "data_lv"
 lvm_data_volume_size: "80%VG"
 
-# Passwords from environment
-admin_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default(omit) }}"
-secondary_password: "{{ lookup('env', 'SECONDARY_PASSWORD') | default(omit) }}"
-
 # NFS Configuration
 nfs_share_server: "10.0.40.2"
 nfs_share_path: "/media"
@@ -92,6 +78,16 @@ nfs_mount_point: "/data/media"
 role_pip_packages:
   - setuptools
   - pynvim
+  - docker
+
+# Portainer Configuration
+install_portainer: true
+portainer_image_version: "2.33.6"
+portainer_agent_image_version: "2.33.6"
+portainer_http_port: "9000"
+portainer_https_port: "9443"
+portainer_agent_port: "9001"
+portainer_admin_user: admin
 
 # Other secrets
 github_personal_access_token: "{{ lookup('env', 'GITHUB_PERSONAL_ACCESS_TOKEN') | default(omit) }}"

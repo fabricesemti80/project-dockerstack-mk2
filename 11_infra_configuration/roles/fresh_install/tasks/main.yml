@@ -46,6 +46,13 @@
   tags: [swarm, docker]
   when: install_docker | default(true) | bool
 
+- name: Portainer setup
+  include_tasks: portainer_setup.yml
+  tags: [portainer, docker]
+  when: 
+    - install_portainer | default(true) | bool
+    - inventory_hostname == groups['cloud_vms'][0]
+
 - name: ZSH setup
   include_tasks: zsh_setup.yml
   tags: [zsh]

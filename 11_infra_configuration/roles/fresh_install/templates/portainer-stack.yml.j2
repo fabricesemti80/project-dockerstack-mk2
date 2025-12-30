@@ -1,0 +1,50 @@
+version: '3.2'
+
+services:
+  agent:
+    image: portainer/agent:{{ portainer_agent_image_version }}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - agent_network
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.platform.os == linux]
+
+  portainer:
+    image: portainer/portainer-ce:{{ portainer_image_version }}
+    command: -H tcp://tasks.agent:{{ portainer_agent_port }} --tlsskipverify
+    ports:
+      - "{{ portainer_https_port }}:9443"
+      - "{{ portainer_http_port }}:9000"
+    volumes:
+      - portainer_data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - agent_network
+      - traefik_traefik-public
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+          - node.hostname == {{ inventory_hostname }}
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.portainer.rule=Host(`portainer.{{ apps_domain }}`)"
+        - "traefik.http.routers.portainer.entrypoints=websecure"
+        - "traefik.http.routers.portainer.tls.certresolver=cloudflare"
+        - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
+networks:
+  agent_network:
+    driver: overlay
+    attachable: true
+  traefik_traefik-public:
+    external: true
+
+volumes:
+  portainer_data:

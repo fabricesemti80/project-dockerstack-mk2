@@ -8,7 +8,7 @@ tasks:
   init:
     desc: Install Ansible dependencies
     cmds:
-      - ansible-galaxy collection install community.general ansible.posix
+      - ansible-galaxy collection install community.general ansible.posix community.docker
       - ansible-galaxy role install -p roles/ geerlingguy.docker geerlingguy.pip artis3n.tailscale
 
   plan:

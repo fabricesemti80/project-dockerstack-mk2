@@ -19,33 +19,6 @@
         update_cache: true
       tags: [always]
 
-    - name: "Get Tailscale interface information"
-      ansible.builtin.setup:
-        filter: ansible_tailscale0
-      tags: [docker, always]
-
-    - name: "Create Docker systemd override directory"
-      ansible.builtin.file:
-        path: /etc/systemd/system/docker.service.d
-        state: directory
-        owner: root
-        group: root
-        mode: '0755'
-      tags: [docker]
-
-    - name: "Configure Docker systemd override to remove CLI flags"
-      ansible.builtin.copy:
-        content: |
-          [Service]
-          ExecStart=
-          ExecStart=/usr/bin/dockerd
-        dest: /etc/systemd/system/docker.service.d/override.conf
-        owner: root
-        group: root
-        mode: '0644'
-      tags: [docker]
-      notify: "Reload systemd"
-
   roles:
     - role: artis3n.tailscale
       vars:
@@ -60,9 +33,18 @@
         pip_install_packages:
           - setuptools
           - pynvim
+          - docker
       ignore_errors: "{{ ansible_check_mode }}"
 
-    - role: geerlingguy.docker
+  tasks:
+    - name: "Refresh Tailscale interface facts"
+      ansible.builtin.setup:
+        filter: ansible_tailscale0
+      tags: [always]
+
+    - name: "Apply Docker role"
+      ansible.builtin.include_role:
+        name: geerlingguy.docker
       vars:
         docker_users:
           - "{{ admin_user }}"
@@ -70,7 +52,7 @@
         docker_daemon_options:
           mtu: 1280
           hosts:
-            - "tcp://{{ ansible_tailscale0.ipv4.address | default('127.0.0.1') }}:2376"
+            - "tcp://{{ ansible_facts['ansible_tailscale0'].ipv4.address | default('127.0.0.1') }}:2376"
             - "unix:///var/run/docker.sock"
           log-driver: "json-file"
           log-opts:
@@ -83,9 +65,34 @@
             - base: "10.20.0.0/16"
               size: 24
       ignore_errors: "{{ ansible_check_mode }}"
+      tags: [docker]
 
-    - role: fresh_install
+    - name: "Apply remaining roles"
+      ansible.builtin.include_role:
+        name: fresh_install
       ignore_errors: "{{ ansible_check_mode }}"
+
+  post_tasks:
+    - name: "Final Portainer Information"
+      ansible.builtin.debug:
+        msg:
+          - "=================================================="
+          - "🚀 PORTAINER DEPLOYMENT COMPLETE"
+          - ""
+          - "🌐 Access URLs:"
+          - "   • Public IP:    {{ hostvars[groups['cloud_vms'][0]].portainer_public_url | default('N/A') }}"
+          - "   • Tailscale IP: {{ hostvars[groups['cloud_vms'][0]].portainer_tailscale_url | default('N/A') }}"
+          - "   • Domain:       {{ hostvars[groups['cloud_vms'][0]].portainer_domain_url | default('N/A') }}"
+          - ""
+          - "🔑 API Token (terraform):"
+          - "   {{ hostvars[groups['cloud_vms'][0]].portainer_access_token | default('N/A') }}"
+          - ""
+          - "⚠️ Note: Store this token securely. It will not be shown again."
+          - "=================================================="
+      run_once: true
+      when: 
+        - hostvars[groups['cloud_vms'][0]].portainer_access_token is defined
+        - not ansible_check_mode
 
   handlers:
     - name: "Reload systemd"

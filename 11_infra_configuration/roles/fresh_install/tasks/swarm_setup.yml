@@ -84,10 +84,16 @@
       tags: [swarm, labels]
 
     - name: "Apply manager labels to all managers"
-      ansible.builtin.command: "docker node update --label-add role=manager {{ item }}"
+      ansible.builtin.command: "docker node update --label-add manager=true {{ item }}"
       loop: "{{ groups['swarm_managers'] }}"
       changed_when: true
       tags: [swarm, labels]
+
+    - name: "Create shared overlay networks"
+      docker_network:
+        name: traefik_traefik-public
+        driver: overlay
+        attachable: true
+      ignore_errors: true
+      tags: [swarm, network]
   when: 
-    - not ansible_check_mode
-    - swarm_state.stdout == 'active' or (inventory_hostname == groups['cloud_vms'][0] and swarm_state.stdout == 'active')
