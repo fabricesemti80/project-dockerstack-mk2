@@ -12,6 +12,8 @@ services:
       - beszel_data:/beszel_data
     networks:
       - proxy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     deploy:
       mode: replicated
       replicas: 1
@@ -29,7 +31,6 @@ services:
 
   beszel-agent:
     image: henrygd/beszel-agent:latest
-    # Host network ports are required for accurate host metrics in Swarm
     ports:
       - target: 45876
         published: 45876
@@ -40,7 +41,7 @@ services:
       KEY: ${BESZEL_AGENT_KEY}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /:/host:ro # Allows monitoring host disks
+      - /:/host:ro
     deploy:
       mode: global
       placement:
