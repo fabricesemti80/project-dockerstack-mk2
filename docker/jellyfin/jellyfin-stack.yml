@@ -1,4 +1,4 @@
-# Jellyfin - Media Server (Persistent Swarm Config)
+# Jellyfin - Media Server (Performance Optimized)
 # https://jellyfin.org/
 
 version: "3.9"
@@ -9,13 +9,14 @@ services:
     networks:
       - proxy
     volumes:
-      # We use bind mounts to the NFS share for cluster-wide persistence
+      # Performance: Config and Cache on local LVM storage
       - type: bind
-        source: /data/media/config/jellyfin
+        source: /data/homelab/jellyfin/config
         target: /config
       - type: bind
-        source: /data/media/config/jellyfin-cache
+        source: /data/homelab/jellyfin/cache
         target: /cache
+      # Library: Shared NFS storage
       - type: bind
         source: /data/media
         target: /media
@@ -27,7 +28,6 @@ services:
         mode: ingress
     environment:
       - JELLYFIN_PublishedServerUrl=https://jellyfin.${DOMAIN}
-      # Map to your host user (fs) to avoid NFS permission issues
       - PUID=1000
       - PGID=1000
     deploy:
@@ -35,7 +35,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.labels.proxmox == true
+          - node.hostname == dkr-srv-3
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=proxy"
