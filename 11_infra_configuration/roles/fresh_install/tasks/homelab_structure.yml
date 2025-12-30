@@ -12,31 +12,18 @@
     - "/data/torrents"
     - "/data/usenet"
 
-- name: Set directory permissions
+- name: Set directory permissions (non-recursive for media)
   ansible.builtin.file:
     path: "{{ item }}"
     owner: "{{ admin_user }}"
     group: "{{ admin_user }}"
     mode: '0755'
-    recurse: true
+    recurse: "{{ 'false' if item == '/data/media' else 'true' }}"
   loop:
     - "/data/homelab"
     - "/data/media"
     - "/data/torrents"
     - "/data/usenet"
-
-- name: Set appropriate ACLs for all data directories
-  ansible.builtin.shell: |
-    setfacl -R -m u:{{ secondary_user }}:rwx {{ item }}
-    setfacl -R -m d:u:{{ secondary_user }}:rwx {{ item }}
-  ignore_errors: true
-  loop:
-    - "/data/homelab"
-    - "/data/media"
-    - "/data/torrents"
-    - "/data/usenet"
-  when: enable_acl_permissions | default(false) | bool
-  changed_when: true
 
 - name: Create README files for each directory
   ansible.builtin.copy:
@@ -68,6 +55,8 @@
     - name: "Usenet"
       path: "/data/usenet"
       description: "Usenet downloads and processing"
+  # Don't write README into the media share if it's already mounted
+  when: item.path != "/data/media"
 
 - name: Create .gitkeep files
   ansible.builtin.copy:
