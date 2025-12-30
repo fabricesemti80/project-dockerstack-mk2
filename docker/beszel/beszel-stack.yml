@@ -36,6 +36,7 @@ services:
     environment:
       - KEY=${BESZEL_AGENT_KEY:-}
       - HUB_URL=https://beszel.${DOMAIN}
+      - TOKEN=${BESZEL_AGENT_TOKEN}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:

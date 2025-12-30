@@ -29,6 +29,7 @@ resource "portainer_stack" "traefik" {
   file_path_in_repository   = "docker/traefik/traefik-stack.yml"
   force_update              = true
   pull_image                = true
+  prune                     = true
   update_interval           = "5m"
 
   env {
@@ -57,6 +58,7 @@ resource "portainer_stack" "whoami" {
   file_path_in_repository   = "docker/traefik/whoami-stack.yml"
   force_update              = true
   pull_image                = true
+  prune                     = true
   update_interval           = "5m"
 
   env {
@@ -77,6 +79,7 @@ resource "portainer_stack" "cloudflared" {
   file_path_in_repository   = "docker/cloudflared/cloudflared-stack.yml"
   force_update              = true
   pull_image                = true
+  prune                     = true
   update_interval           = "5m"
 
   env {
@@ -97,6 +100,7 @@ resource "portainer_stack" "beszel" {
   file_path_in_repository   = "docker/beszel/beszel-stack.yml"
   force_update              = true
   pull_image                = true
+  prune                     = true
   update_interval           = "5m"
 
   env {
@@ -107,6 +111,11 @@ resource "portainer_stack" "beszel" {
   env {
     name  = "BESZEL_AGENT_KEY"
     value = var.beszel_agent_key
+  }
+
+  env {
+    name  = "BESZEL_AGENT_TOKEN"
+    value = var.beszel_agent_token
   }
 
   depends_on = [portainer_stack.traefik]
