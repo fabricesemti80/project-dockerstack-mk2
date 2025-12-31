@@ -7,7 +7,7 @@
     target: _blank
 
 - resources:
-    label: my-docker
+    label: local
     cpu: true
     memory: true
     disk: /

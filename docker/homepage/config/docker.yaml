@@ -1,5 +1,10 @@
 # Docker Swarm Discovery Configuration
-# Using local socket as we are on a manager node
-my-docker:
+
+# For Swarm Service Discovery (Cluster-wide)
+my-swarm:
   socket: /var/run/docker.sock
   swarm: true
+
+# For Local Resources Widget (Node Stats)
+local:
+  socket: /var/run/docker.sock
