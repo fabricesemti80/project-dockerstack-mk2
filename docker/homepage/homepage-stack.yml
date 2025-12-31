@@ -10,13 +10,21 @@ services:
       - proxy
       - traefik_traefik-public
     volumes:
-      - /data/homelab/docker-data/homepage/config:/app/config
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    configs:
+      - source: homepage_docker
+        target: /app/config/docker.yaml
+      - source: homepage_services
+        target: /app/config/services.yaml
+      - source: homepage_widgets
+        target: /app/config/widgets.yaml
+      - source: homepage_settings
+        target: /app/config/settings.yaml
     environment:
       - PUID=1000
       - PGID=989
       - HOMEPAGE_ALLOWED_HOSTS=home.${DOMAIN},10.0.30.0/24,10.0.100.0/24,127.0.0.1
-      - HOMEPAGE_VAR_PORTAINER_ACCESS_TOKEN=${PORTAINER_ACCESS_TOKEN}
+      - PORTAINER_ACCESS_TOKEN=${PORTAINER_ACCESS_TOKEN}
     deploy:
       mode: replicated
       replicas: 1
@@ -25,6 +33,7 @@ services:
           - node.role == manager
           - node.labels.cloud == true
           - node.labels.leader == true
+
       labels:
         # Traefik Configuration
         - "traefik.enable=true"
@@ -47,3 +56,13 @@ networks:
     external: true
   traefik_traefik-public:
     external: true
+
+configs:
+  homepage_docker:
+    file: ./config/docker.yaml
+  homepage_services:
+    file: ./config/services.yaml
+  homepage_widgets:
+    file: ./config/widgets.yaml
+  homepage_settings:
+    file: ./config/settings.yaml

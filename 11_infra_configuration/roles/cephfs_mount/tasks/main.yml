@@ -125,13 +125,3 @@
     mode: '0755'
   loop: "{{ cephfs_docker_data_dirs }}"
   tags: [cephfs, create_dirs, storage]
-
-- name: Sync Homepage configuration files
-  ansible.builtin.copy:
-    src: "../../../../docker/homepage/config/"
-    dest: "{{ cephfs_mount_point }}/docker-data/homepage/config/"
-    owner: "{{ admin_user }}"
-    group: "{{ admin_user }}"
-    mode: '0644'
-  run_once: true
-  tags: [cephfs, homepage, storage]
