@@ -1,0 +1,7 @@
+# Service Groups
+# This will be populated automatically by Docker labels, 
+# but we can define structure here if needed.
+# For now, we leave it minimal.
+
+- Docker Apps: []
+- Management: []

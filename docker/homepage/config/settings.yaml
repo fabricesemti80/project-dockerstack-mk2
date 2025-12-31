@@ -1,0 +1,12 @@
+# Homepage Settings
+# https://gethomepage.dev/latest/configs/settings/
+
+title: Homelab Dashboard
+base: https://home.{{ apps_domain }}
+# layout:
+#   Management:
+#     style: grid
+#     columns: 4
+#   Docker Apps:
+#     style: grid
+#     columns: 4

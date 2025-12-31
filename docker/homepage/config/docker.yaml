@@ -1,0 +1,5 @@
+# Docker Swarm Discovery Configuration
+# This tells Homepage to look at the local socket (on the manager) for labels
+my-swarm:
+  socket: /var/run/docker.sock
+  swarm: true

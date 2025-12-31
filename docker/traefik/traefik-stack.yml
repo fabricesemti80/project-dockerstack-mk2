@@ -66,6 +66,15 @@ services:
         - "traefik.http.routers.traefik.tls.certresolver=cloudflare"
         - "traefik.http.routers.traefik.service=api@internal"
 
+        # Homepage Dashboard
+        - "homepage.group=Management"
+        - "homepage.name=Traefik"
+        - "homepage.icon=traefik.png"
+        - "homepage.href=https://traefik.${DOMAIN}"
+        - "homepage.description=Reverse Proxy"
+        - "homepage.widget.type=traefik"
+        - "homepage.widget.url=http://traefik:8080"
+
 volumes:
   traefik-acme:
 

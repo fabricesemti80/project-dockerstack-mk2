@@ -39,6 +39,16 @@ services:
         - "traefik.http.routers.portainer.tls.certresolver=cloudflare"
         - "traefik.http.services.portainer.loadbalancer.server.port=9000"
 
+        # Homepage Dashboard
+        - "homepage.group=Management"
+        - "homepage.name=Portainer"
+        - "homepage.icon=portainer.png"
+        - "homepage.href=https://portainer.{{ apps_domain }}"
+        - "homepage.description=Docker Management"
+        - "homepage.widget.type=portainer"
+        - "homepage.widget.url=http://portainer:9000"
+        - "homepage.widget.env=PORTAINER_ACCESS_TOKEN" # Needs API Token injection if used
+
 networks:
   agent_network:
     driver: overlay

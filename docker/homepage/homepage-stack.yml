@@ -1,0 +1,43 @@
+# Homepage - Modern Dashboard
+# https://gethomepage.dev/
+
+version: "3.9"
+
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    networks:
+      - proxy
+    volumes:
+      - /data/homelab/docker-data/homepage/config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Required for Docker discovery
+    environment:
+      - PUID=1000
+      - PGID=1000
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager # Must be on a manager to read Swarm state
+          - node.labels.proxmox == true # Use shared storage nodes
+      labels:
+        # Traefik Configuration
+        - "traefik.enable=true"
+        - "traefik.docker.network=proxy"
+        - "traefik.http.routers.homepage.rule=Host(`home.${DOMAIN}`)"
+        - "traefik.http.routers.homepage.entrypoints=websecure"
+        - "traefik.http.routers.homepage.tls.certresolver=cloudflare"
+        - "traefik.http.services.homepage.loadbalancer.server.port=3000"
+        
+        # Self-Discovery (Add itself to the dashboard)
+        - "homepage.group=Management"
+        - "homepage.name=Homepage"
+        - "homepage.icon=homepage.png"
+        - "homepage.href=https://home.${DOMAIN}"
+        - "homepage.description=Dashboard"
+        - "homepage.weight=0"
+
+networks:
+  proxy:
+    external: true

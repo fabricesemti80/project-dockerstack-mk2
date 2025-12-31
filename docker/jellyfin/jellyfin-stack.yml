@@ -50,6 +50,16 @@ services:
         - "traefik.http.routers.jellyfin.middlewares=jellyfin-compress"
         - "traefik.http.middlewares.jellyfin-compress.compress=true"
 
+        # Homepage Dashboard
+        - "homepage.group=Docker Apps"
+        - "homepage.name=Jellyfin"
+        - "homepage.icon=jellyfin.png"
+        - "homepage.href=https://jellyfin.${DOMAIN}"
+        - "homepage.description=Media Server"
+        - "homepage.widget.type=jellyfin"
+        - "homepage.widget.url=http://jellyfin:8096"
+        - "homepage.widget.key=${JELLYFIN_API_KEY}" # User must provide this env var if they want the widget
+
 networks:
   proxy:
     external: true
