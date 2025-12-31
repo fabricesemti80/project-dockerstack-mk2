@@ -116,14 +116,22 @@
     state: absent
   tags: [cephfs, cleanup, storage]
 
-- name: Create Jellyfin directories in docker-data
+- name: Create app-specific directories in docker-data
   ansible.builtin.file:
     path: "{{ cephfs_mount_point }}/docker-data/{{ item }}"
     state: directory
     owner: "{{ admin_user }}"
     group: "{{ admin_user }}"
     mode: '0755'
-  loop:
-    - jellyfin
-    - jellyfin-cache
+  loop: "{{ cephfs_docker_data_dirs }}"
   tags: [cephfs, create_dirs, storage]
+
+- name: Sync Homepage configuration files
+  ansible.builtin.copy:
+    src: "../../../../docker/homepage/config/"
+    dest: "{{ cephfs_mount_point }}/docker-data/homepage/config/"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0644'
+  run_once: true
+  tags: [cephfs, homepage, storage]

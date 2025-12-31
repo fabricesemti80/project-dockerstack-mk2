@@ -5,6 +5,12 @@ vars:
   INVENTORY: inventory/hosts
 
 tasks:
+  default:
+    desc: List all tasks
+    cmds:
+      - task --list
+    silent: true
+
   init:
     desc: Install Ansible dependencies
     cmds:
@@ -21,3 +27,14 @@ tasks:
     cmds:
       - echo "Applying changes..."
       - doppler run -- ansible-playbook -i {{.INVENTORY}} {{.PLAYBOOK}}
+
+  storage-plan:
+    desc: Run Ansible playbook in check mode (dry run) for storage only
+    cmds:
+      - doppler run -- ansible-playbook -i {{.INVENTORY}} {{.PLAYBOOK}} --check --diff --tags storage
+
+  storage-apply:
+    desc: Run Ansible playbook to apply changes for storage only
+    cmds:
+      - echo "Applying changes..."
+      - doppler run -- ansible-playbook -i {{.INVENTORY}} {{.PLAYBOOK}} --tags storage

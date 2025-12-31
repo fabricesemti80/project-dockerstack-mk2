@@ -15,3 +15,9 @@ cephfs_app_dirs:
   - volumes
   - backups
   - docker-data
+
+cephfs_docker_data_dirs:
+  - jellyfin
+  - jellyfin-cache
+  - homepage
+  - homepage/config
