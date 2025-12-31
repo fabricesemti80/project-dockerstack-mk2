@@ -1,5 +1,6 @@
 # Docker Swarm Discovery Configuration
-# This tells Homepage to look at the local socket (on the manager) for labels
+# This tells Homepage to look at the socket proxy for labels
 my-swarm:
-  socket: /var/run/docker.sock
+  host: traefik_socket-proxy
+  port: 2375
   swarm: true
