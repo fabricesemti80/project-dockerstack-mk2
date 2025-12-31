@@ -9,8 +9,6 @@ services:
     networks:
       - proxy
       - traefik_traefik-public
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     configs:
       - source: homepage_docker
         target: /app/config/docker.yaml
@@ -21,10 +19,10 @@ services:
       - source: homepage_settings
         target: /app/config/settings.yaml
     environment:
-      - PUID=0 # Running as root to access docker socket
-      - PGID=0
+      - PUID=1000
+      - PGID=1000
       - HOMEPAGE_ALLOWED_HOSTS=home.${DOMAIN},10.0.30.0/24,10.0.100.0/24,127.0.0.1
-      - HOMEPAGE_VAR_PORTAINER_ACCESS_TOKEN=${PORTAINER_ACCESS_TOKEN}
+      - PORTAINER_ACCESS_TOKEN=${PORTAINER_ACCESS_TOKEN}
     deploy:
       mode: replicated
       replicas: 1

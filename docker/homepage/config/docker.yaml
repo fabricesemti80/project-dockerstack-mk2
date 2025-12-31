@@ -1,11 +1,5 @@
 # Docker Swarm Discovery Configuration
-
-# For Swarm Service Discovery (Cluster-wide)
-my-swarm:
-  socket: /var/run/docker.sock
+my-docker:
+  host: traefik_socket-proxy
+  port: 2375
   swarm: true
-
-# For Local Resources Widget (Node Stats)
-local:
-  socket: /var/run/docker.sock
-  swarm: false
