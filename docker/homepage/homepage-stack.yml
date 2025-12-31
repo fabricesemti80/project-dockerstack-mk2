@@ -24,7 +24,7 @@ services:
       - PUID=0 # Running as root to access docker socket
       - PGID=0
       - HOMEPAGE_ALLOWED_HOSTS=home.${DOMAIN},10.0.30.0/24,10.0.100.0/24,127.0.0.1
-      - PORTAINER_ACCESS_TOKEN=${PORTAINER_ACCESS_TOKEN}
+      - HOMEPAGE_VAR_PORTAINER_ACCESS_TOKEN=${PORTAINER_ACCESS_TOKEN}
     deploy:
       mode: replicated
       replicas: 1
