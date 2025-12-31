@@ -1,4 +1,7 @@
 ---
+# ==============================================================================
+# PHASE 1: BASE SYSTEM BOOTSTRAP
+# ==============================================================================
 - name: Locale setup
   include_tasks: locale_setup.yml
   tags: [locale]
@@ -15,6 +18,28 @@
   include_tasks: package_installation.yml
   tags: [packages]
 
+- name: Python setup
+  include_tasks: python_setup.yml
+  tags: [python]
+
+- name: ZSH setup
+  include_tasks: zsh_setup.yml
+  tags: [zsh]
+  when: install_zsh | default(true) | bool
+
+- name: Neovim installation
+  include_tasks: neovim_installation.yml
+  tags: [neovim]
+  when: install_neovim | default(true) | bool
+
+- name: SSH banner setup
+  include_tasks: ssh_banner_setup.yml
+  tags: [ssh, banner]
+  when: install_ssh_banner | default(true) | bool
+
+# ==============================================================================
+# PHASE 2: STORAGE INFRASTRUCTURE
+# ==============================================================================
 - name: Storage setup
   include_tasks: storage_setup.yml
   tags: [storage, lvm]
@@ -25,6 +50,14 @@
   tags: [storage, lvm]
   when: install_storage | default(true) | bool
 
+- name: Mount CephFS (Shared Storage)
+  include_role:
+    name: cephfs_mount
+  tags: [storage, cephfs]
+  when: 
+    - inventory_hostname in groups['proxmox_vms']
+    - install_storage | default(true) | bool
+
 - name: NFS Media Mount
   include_tasks: nfs_mount.yml
   tags: [storage, nfs, media]
@@ -32,9 +65,21 @@
     - inventory_hostname in groups['proxmox_vms']
     - install_storage | default(true) | bool
 
-- name: Python setup
-  include_tasks: python_setup.yml
-  tags: [python]
+# ==============================================================================
+# PHASE 3: APPLICATION STRUCTURE
+# ==============================================================================
+- name: Homelab directory structure
+  include_tasks: homelab_structure.yml
+  tags: [homelab, directories, storage]
+  when: create_homelab_structure | default(true) | bool
+
+# ==============================================================================
+# PHASE 4: SERVICES & ORCHESTRATION
+# ==============================================================================
+- name: Webmin and Usermin setup
+  include_tasks: webmin_setup.yml
+  tags: [webmin, usermin]
+  when: install_webmin | default(true) | bool
 
 - name: Docker setup
   include_tasks: docker_setup.yml
@@ -52,28 +97,3 @@
   when: 
     - install_portainer | default(true) | bool
     - inventory_hostname == groups['cloud_vms'][0]
-
-- name: ZSH setup
-  include_tasks: zsh_setup.yml
-  tags: [zsh]
-  when: install_zsh | default(true) | bool
-
-- name: Homelab directory structure
-  include_tasks: homelab_structure.yml
-  tags: [homelab, directories, storage]
-  when: create_homelab_structure | default(true) | bool
-
-- name: Neovim installation
-  include_tasks: neovim_installation.yml
-  tags: [neovim]
-  when: install_neovim | default(true) | bool
-
-- name: Webmin and Usermin setup
-  include_tasks: webmin_setup.yml
-  tags: [webmin, usermin]
-  when: install_webmin | default(true) | bool
-
-- name: SSH banner setup
-  include_tasks: ssh_banner_setup.yml
-  tags: [ssh, banner]
-  when: install_ssh_banner | default(true) | bool
