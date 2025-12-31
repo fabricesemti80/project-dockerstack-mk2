@@ -1,7 +1,11 @@
-# Service Groups
-# This will be populated automatically by Docker labels, 
-# but we can define structure here if needed.
-# For now, we leave it minimal.
-
 - Docker Apps: []
-- Management: []
+- Management:
+    - Portainer:
+        icon: portainer.png
+        href: https://portainer.${DOMAIN}
+        description: Container Management
+        widget:
+          type: portainer
+          url: http://portainer:9000
+          env: 1
+          key: {{HOMEPAGE_VAR_PORTAINER_ACCESS_TOKEN}}

@@ -15,6 +15,9 @@
           - acl
           - python3-pip
           - python3-packaging
+          - python3-setuptools
+          - python3-pynvim
+          - python3-docker
         state: present
         update_cache: true
       tags: [always]
@@ -26,15 +29,6 @@
         tailscale_args: "--accept-routes=false --ssh"
       ignore_errors: "{{ ansible_check_mode }}"
       tags: [tailscale]
-
-    - role: geerlingguy.pip
-      vars:
-        pip_package: python3-pip
-        pip_install_packages:
-          - setuptools
-          - pynvim
-          - docker
-      ignore_errors: "{{ ansible_check_mode }}"
 
   tasks:
     - name: "Refresh Tailscale interface facts"

@@ -149,6 +149,11 @@ resource "portainer_stack" "homepage" {
     value = var.apps_domain
   }
 
+  env {
+    name  = "PORTAINER_ACCESS_TOKEN"
+    value = var.portainer_access_token
+  }
+
   depends_on = [portainer_stack.traefik]
 }
 

@@ -47,7 +47,8 @@ services:
         - "homepage.description=Docker Management"
         - "homepage.widget.type=portainer"
         - "homepage.widget.url=http://portainer:9000"
-        - "homepage.widget.env=PORTAINER_ACCESS_TOKEN" # Needs API Token injection if used
+        - "homepage.widget.key={{ '{{' }}PORTAINER_ACCESS_TOKEN{{ '}}' }}"
+        - "homepage.widget.env=1"
 
 networks:
   agent_network:

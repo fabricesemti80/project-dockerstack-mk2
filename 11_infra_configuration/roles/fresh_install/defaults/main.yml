@@ -79,11 +79,6 @@ nfs_mount_point: "/data/media"
 ceph_monitors: "10.0.40.11,10.0.40.12,10.0.40.13"
 ceph_secret_key: "{{ lookup('env', 'CEPH_SECRET_KEY') | default('') }}"
 
-role_pip_packages:
-  - setuptools
-  - pynvim
-  - docker
-
 # Portainer Configuration
 install_portainer: true
 portainer_image_version: "2.33.6"
