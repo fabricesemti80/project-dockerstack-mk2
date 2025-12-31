@@ -1,11 +1,11 @@
 - Docker Apps: []
-- Management:
-    - Portainer:
-        icon: portainer.png
-        href: https://portainer.${DOMAIN}
-        description: Container Management
-        widget:
-          type: portainer
-          url: http://portainer:9000
-          env: 1
-          key: {{HOMEPAGE_VAR_PORTAINER_ACCESS_TOKEN}}
+# - Management:
+#     - Portainer:
+#         icon: portainer.png
+#         href: https://portainer.${DOMAIN}
+#         description: Container Management
+#         widget:
+#           type: portainer
+#           url: http://portainer:9000
+#           env: 1
+#           key: {{HOMEPAGE_VAR_PORTAINER_ACCESS_TOKEN}}
