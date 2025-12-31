@@ -43,9 +43,9 @@
   ansible.builtin.template:
     src: ceph.client.admin.keyring.j2
     dest: "/etc/ceph/ceph.client.{{ cephfs_user }}.keyring"
-    owner: root
+    owner: "{{ admin_user }}"
     group: root
-    mode: '0600'
+    mode: '0640'
   no_log: true
   tags: [cephfs, storage]
 
