@@ -12,6 +12,11 @@ if [ -z "$ANSIBLE_SSH_PRIVATE_KEY" ]; then
     exit 1
 fi
 
+if [ -z "$CEPH_SECRET_KEY" ]; then
+    echo "Error: CEPH_SECRET_KEY is not set. Please ensure it is available in Doppler or your environment."
+    exit 1
+fi
+
 # Create a temporary file for the SSH private key
 KEY_FILE=$(mktemp /tmp/ansible_key.XXXXXX)
 echo "$ANSIBLE_SSH_PRIVATE_KEY" > "$KEY_FILE"

@@ -71,7 +71,7 @@ locals {
       node_name    = "pve-0"
       ipv4_address = "10.0.30.11/24"
       ipv4_gateway = "10.0.30.1"
-      storage_ipv4 = "10.0.70.1/24"
+      storage_ipv4 = "10.0.70.21/24"
     }
   
     dkr_srv_2 = {
@@ -80,7 +80,7 @@ locals {
       node_name    = "pve-1"
       ipv4_address = "10.0.30.12/24"
       ipv4_gateway = "10.0.30.1"
-      storage_ipv4 = "10.0.70.2/24"
+      storage_ipv4 = "10.0.70.22/24"
     }
   
     dkr_srv_3 = {
@@ -89,7 +89,7 @@ locals {
       node_name    = "pve-2"
       ipv4_address = "10.0.30.13/24"
       ipv4_gateway = "10.0.30.1"
-      storage_ipv4 = "10.0.70.3/24"
+      storage_ipv4 = "10.0.70.23/24"
     }
   }
   

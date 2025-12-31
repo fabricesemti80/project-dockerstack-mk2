@@ -1,0 +1,19 @@
+---
+- name: Fix Broken Mount
+  hosts: dkr-srv-1
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Lazy unmount /data/homelab
+      command: umount -l /data/homelab
+      register: umount_out
+      failed_when: false
+
+    - name: Check if directory exists now
+      stat:
+        path: /data/homelab
+      register: dir_stat
+
+    - name: Debug stat
+      debug:
+        var: dir_stat

@@ -1,2 +1,2 @@
-[client.admin]
-    key = {{ ceph_secret_key | trim }}
+[client.{{ cephfs_user }}]
+    key = {{ cephfs_secret | trim }}

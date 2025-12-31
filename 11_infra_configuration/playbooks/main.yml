@@ -68,10 +68,11 @@
       tags: [docker]
 
     - name: "Apply remaining roles"
-      ansible.builtin.include_role:
-        name: fresh_install
+      block:
+        - ansible.builtin.import_role:
+            name: fresh_install
       ignore_errors: "{{ ansible_check_mode }}"
-      tags: [fresh_install, storage]
+      tags: [fresh_install]
 
     - name: "Apply CephFS mount role"
       ansible.builtin.include_role:

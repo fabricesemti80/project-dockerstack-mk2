@@ -1,0 +1,20 @@
+---
+- name: Correct Storage Network IP addresses (Netplan)
+  become: true
+  block:
+    - name: Set target IP based on hostname
+      ansible.builtin.set_fact:
+        target_storage_ip: "10.0.70.{{ '21' if inventory_hostname == 'dkr-srv-1' else '22' if inventory_hostname == 'dkr-srv-2' else '23' }}"
+
+    - name: Update IP in Netplan config
+      ansible.builtin.replace:
+        path: /etc/netplan/50-cloud-init.yaml
+        regexp: '10\.0\.70\.[0-9]+'
+        replace: "{{ target_storage_ip }}"
+      register: netplan_update
+
+    - name: Apply Netplan changes
+      ansible.builtin.command: netplan apply
+      when: netplan_update.changed
+      async: 10
+      poll: 0

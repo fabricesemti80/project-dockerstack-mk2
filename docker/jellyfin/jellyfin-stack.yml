@@ -11,10 +11,10 @@ services:
     volumes:
       # Shared CephFS persistence for all Proxmox nodes
       - type: bind
-        source: /data/homelab/jellyfin
+        source: /data/homelab/docker-data/jellyfin
         target: /config
       - type: bind
-        source: /data/homelab/volumes/jellyfin-cache
+        source: /data/homelab/docker-data/jellyfin-cache
         target: /cache
       # Library remains on large NFS share
       - type: bind

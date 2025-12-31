@@ -4,7 +4,7 @@ cephfs_monitors: "10.0.70.10,10.0.70.11,10.0.70.12"
 cephfs_mount_point: "/data/homelab"
 cephfs_user: "admin"
 # Read from CEPH_SECRET_KEY env var via Doppler in run.sh
-cephfs_secret: "{{ ceph_secret_key | default('') }}"
+cephfs_secret: "{{ ceph_secret_key | default(lookup('env', 'CEPH_SECRET_KEY')) | default('') }}"
 cephfs_fs_name: "cephfs-vm"
 cephfs_path: "/"
 
@@ -14,4 +14,4 @@ cephfs_app_dirs:
   - configs
   - volumes
   - backups
-  - jellyfin
+  - docker-data

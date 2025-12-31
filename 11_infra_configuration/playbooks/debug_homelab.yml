@@ -1,0 +1,23 @@
+---
+- name: Debug Homelab Path
+  hosts: dkr-srv-1
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Check what /data/homelab is
+      ansible.builtin.shell: ls -ld /data/homelab
+      register: ls_output
+      ignore_errors: true
+
+    - name: Show ls output
+      ansible.builtin.debug:
+        var: ls_output.stdout
+
+    - name: Check if it is a mountpoint
+      ansible.builtin.shell: mountpoint /data/homelab
+      register: mount_output
+      ignore_errors: true
+
+    - name: Show mount output
+      ansible.builtin.debug:
+        var: mount_output

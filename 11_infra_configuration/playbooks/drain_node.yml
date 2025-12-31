@@ -1,0 +1,9 @@
+---
+- name: Drain dkr-srv-1
+  hosts: dkr-srv-0
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Drain node
+      command: docker node update --availability drain dkr-srv-1
+      ignore_errors: true

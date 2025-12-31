@@ -1,4 +1,23 @@
 ---
+- name: Check status of homelab paths
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - "/data/homelab"
+    - "/data/media"
+    - "/data/torrents"
+    - "/data/usenet"
+  register: homelab_paths_stat
+
+- name: Remove files/links blocking homelab directories
+  ansible.builtin.file:
+    path: "{{ item.item }}"
+    state: absent
+  loop: "{{ homelab_paths_stat.results }}"
+  when: item.stat.exists and (item.stat.isreg or item.stat.islnk)
+  loop_control:
+    label: "{{ item.item }}"
+
 - name: Create homelab directory structure
   ansible.builtin.file:
     path: "{{ item }}"
@@ -59,117 +78,24 @@
   when: item.path != "/data/media"
 
 - name: Create .gitkeep files
-
   ansible.builtin.copy:
-
     content: ""
-
     dest: "{{ item }}/.gitkeep"
-
     owner: "{{ admin_user }}"
-
     group: "{{ admin_user }}"
-
     mode: '0644'
-
   loop:
-
     - "/data/torrents"
-
     - "/data/usenet"
 
-
-
 - name: Create Jellyfin directories on NFS
-
-
-
   ansible.builtin.file:
-
-
-
     path: "{{ item }}"
-
-
-
     state: directory
-
-
-
     owner: 1000
-
-
-
     group: 1000
-
-
-
     mode: '0755'
-
-
-
   loop:
-
-
-
     - "/data/media/config"
-
-
-
     - "/data/media/config/jellyfin"
-
-
-
     - "/data/media/config/jellyfin-cache"
-
-
-
-
-
-
-
-- name: Create local Jellyfin directories for performance
-
-
-
-  ansible.builtin.file:
-
-
-
-    path: "{{ item }}"
-
-
-
-    state: directory
-
-
-
-    owner: 1000
-
-
-
-    group: 1000
-
-
-
-    mode: '0755'
-
-
-
-  loop:
-
-
-
-    - "/data/homelab/jellyfin"
-
-
-
-    - "/data/homelab/jellyfin/config"
-
-
-
-    - "/data/homelab/jellyfin/cache"
-
-
-
-

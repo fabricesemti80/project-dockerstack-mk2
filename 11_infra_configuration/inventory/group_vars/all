@@ -15,3 +15,6 @@ portainer_admin_password: "{{ lookup('env', 'PORTAINER_ADMIN_PASSWORD') | defaul
 
 # SSH Keys
 ssh_public_keys: "{{ lookup('env', 'TF_VAR_SSH_PUBLIC_KEYS') | default('[]', true) }}"
+
+# Ceph
+ceph_secret_key: "{{ lookup('env', 'CEPH_SECRET_KEY') }}"

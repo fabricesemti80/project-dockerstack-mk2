@@ -1,0 +1,15 @@
+---
+- name: Debug /data/homelab state
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Check /data/homelab status
+      command: ls -lad /data/homelab
+      register: dir_status
+      ignore_errors: true
+      changed_when: false
+
+    - name: Show status
+      debug:
+        var: dir_status.stdout

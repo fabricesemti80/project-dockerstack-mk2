@@ -1,19 +1,19 @@
 ---
 - name: Locale setup
   include_tasks: locale_setup.yml
-  tags: [always, locale]
+  tags: [locale]
 
 - name: User management
   include_tasks: user_management.yml
-  tags: [always, users]
+  tags: [users]
 
 - name: System updates
   include_tasks: system_update.yml
-  tags: [always, system, updates]
+  tags: [system, updates]
 
 - name: Package installation
   include_tasks: package_installation.yml
-  tags: [always, packages]
+  tags: [packages]
 
 - name: Storage setup
   include_tasks: storage_setup.yml
@@ -32,13 +32,9 @@
     - inventory_hostname in groups['proxmox_vms']
     - install_storage | default(true) | bool
 
-  when: 
-    - inventory_hostname in groups['proxmox_vms']
-    - install_storage | default(true) | bool
-
 - name: Python setup
   include_tasks: python_setup.yml
-  tags: [always, python]
+  tags: [python]
 
 - name: Docker setup
   include_tasks: docker_setup.yml
@@ -64,7 +60,7 @@
 
 - name: Homelab directory structure
   include_tasks: homelab_structure.yml
-  tags: [homelab, directories]
+  tags: [homelab, directories, storage]
   when: create_homelab_structure | default(true) | bool
 
 - name: Neovim installation
