@@ -12,6 +12,9 @@ services:
     command:
       # Logging
       - "--log.level=INFO"
+      - "--log.filePath=/var/log/traefik/traefik.log"
+      - "--accesslog=true"
+      - "--accesslog.filepath=/var/log/traefik/access.log"
 
       # API / Dashboard
       - "--api=true"
@@ -22,6 +25,7 @@ services:
       - "--providers.swarm=true"
       - "--providers.swarm.exposedbydefault=false"
       - "--providers.swarm.network=proxy"
+      - "--providers.swarm.endpoint=tcp://socket-proxy:2375"
 
       # EntryPoints
       - "--entrypoints.web.address=:80"
@@ -45,8 +49,8 @@ services:
       - "443:443"
 
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-acme:/acme
+      - traefik-logs:/var/log/traefik
 
     networks:
       - proxy
@@ -76,8 +80,81 @@ services:
         - "homepage.widget.type=traefik"
         - "homepage.widget.url=http://traefik:8080"
 
+  socket-proxy:
+    image: lscr.io/linuxserver/socket-proxy:3.2.3
+    environment:
+      - ALLOW_START=0
+      - ALLOW_STOP=0
+      - CONTAINERS=1
+      - SERVICES=1
+      - TASKS=1
+      - IMAGES=1
+      - INFO=1
+      - NETWORKS=1
+      - NODES=1
+      - POST=1
+      - VOLUMES=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.cloud == true
+          - node.labels.leader == true
+
+  logrotate:
+    image: vegardit/traefik-logrotate:latest
+    environment:
+      DOCKER_HOST: tcp://socket-proxy:2375
+      LOGROTATE_LOGS: /var/log/traefik/*.log
+      LOGROTATE_TRIGGER_INTERVAL: daily
+      LOGROTATE_TRIGGER_SIZE: 50M
+      LOGROTATE_MAX_BACKUPS: 7
+      LOGROTATE_START_INDEX: 1
+      LOGROTATE_FILE_MODE: '0644'
+      LOGROTATE_FILE_USER: root
+      LOGROTATE_FILE_GROUP: root
+      CRON_SCHEDULE: '* * * * *'
+      CRON_LOG_LEVEL: 8
+      TRAEFIK_CONTAINER_ID_COMMAND: docker ps --no-trunc --quiet --filter label=org.opencontainers.image.title=Traefik
+    volumes:
+      - traefik-logs:/var/log/traefik:rw
+    networks:
+      - proxy
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.cloud == true
+          - node.labels.leader == true
+
+  tail-log:
+    image: alpine:latest
+    command: >
+      sh -c "tail -F /var/log/traefik/access.log"
+    volumes:
+      - traefik-logs:/var/log/traefik:ro
+    networks:
+      - proxy
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.cloud == true
+          - node.labels.leader == true
+
 volumes:
   traefik-acme:
+  traefik-logs:
 
 networks:
   proxy:
