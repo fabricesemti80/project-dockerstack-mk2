@@ -24,7 +24,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - agent_network
-      - traefik_traefik-public
+      - portainer_network
     deploy:
       mode: replicated
       replicas: 1
@@ -54,7 +54,7 @@ networks:
   agent_network:
     driver: overlay
     attachable: true
-  traefik_traefik-public:
+  portainer_network:
     external: true
 
 volumes:

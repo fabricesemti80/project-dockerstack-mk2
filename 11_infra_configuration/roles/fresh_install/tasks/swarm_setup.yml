@@ -91,9 +91,9 @@
 
     - name: "Create shared overlay networks"
       docker_network:
-        name: traefik_traefik-public
+        name: portainer_network
         driver: overlay
         attachable: true
       ignore_errors: true
       tags: [swarm, network]
-  when: 
+  when:

@@ -4,7 +4,7 @@ services:
   glance:
     image: glanceapp/glance:latest
     networks:
-      - traefik_traefik-public
+      - proxy
     configs:
       - source: glance_config
         target: /app/config/glance.yml
@@ -45,5 +45,5 @@ volumes:
   glance-data:
 
 networks:
-  traefik_traefik-public:
+  proxy:
     external: true
