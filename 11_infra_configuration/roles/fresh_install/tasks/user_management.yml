@@ -58,6 +58,15 @@
     expires: -1
     append: true
 
+- name: Add secondary user to docker group
+  ansible.builtin.user:
+    name: "{{ secondary_user }}"
+    groups:
+      - "{{ secondary_user }}"
+      - sudo
+      - docker
+    append: true
+
 - name: Normalize SSH Public Keys to list
   ansible.builtin.set_fact:
     raw_ssh_keys: "{{ ssh_public_keys | from_json if (ssh_public_keys is string and ssh_public_keys.startswith('[')) else ([ssh_public_keys] if ssh_public_keys is string else (ssh_public_keys | default([]))) }}"
