@@ -16,6 +16,7 @@ services:
       # API / Dashboard
       - "--api=true"
       - "--api.dashboard=true"
+      - "--api.insecure=true" # Expose API on 8080 for internal access
 
       # Swarm provider
       - "--providers.swarm=true"
