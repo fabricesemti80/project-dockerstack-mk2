@@ -109,7 +109,7 @@ services:
   #         - node.role == manager
   #         - node.labels.cloud == true
   #         - node.labels.leader == true
-  socketproxy:
+  socket-proxy:
     image: tecnativa/docker-socket-proxy:latest
     deploy:
       mode: replicated
