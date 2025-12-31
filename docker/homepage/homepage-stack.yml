@@ -8,12 +8,15 @@ services:
     image: ghcr.io/gethomepage/homepage:latest
     networks:
       - proxy
+      - traefik_traefik-public
     volumes:
       - /data/homelab/docker-data/homepage/config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - PUID=1000
       - PGID=989
       - HOMEPAGE_ALLOWED_HOSTS=home.${DOMAIN},10.0.30.0/24,10.0.100.0/24,127.0.0.1
+      - PORTAINER_ACCESS_TOKEN=${PORTAINER_ACCESS_TOKEN}
     deploy:
       mode: replicated
       replicas: 1
@@ -40,4 +43,6 @@ services:
 
 networks:
   proxy:
+    external: true
+  traefik_traefik-public:
     external: true
