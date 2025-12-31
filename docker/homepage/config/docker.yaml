@@ -8,3 +8,4 @@ my-swarm:
 # For Local Resources Widget (Node Stats)
 local:
   socket: /var/run/docker.sock
+  swarm: false

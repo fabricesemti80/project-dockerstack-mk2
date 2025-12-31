@@ -4,28 +4,6 @@
 version: "3.9"
 
 services:
-  glances:
-    image: nicolargo/glances:latest-full
-    networks:
-      - proxy
-    environment:
-      - GLANCES_OPT=-w --disable-webui
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /:/rootfs:ro
-    pid: host
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-          - node.labels.cloud == true
-          - node.labels.leader == true
-      resources:
-        limits:
-          memory: 256M
-
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     networks:
