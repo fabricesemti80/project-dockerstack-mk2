@@ -198,6 +198,17 @@ variable "network_firewall" {
   default     = false
 }
 
+variable "additional_networks" {
+  description = "List of additional network interfaces to attach"
+  type = list(object({
+    bridge   = string
+    model    = string
+    vlan_id  = number
+    firewall = bool
+  }))
+  default = []
+}
+
 variable "initialization_datastore_id" {
   description = "The datastore ID for the cloud-init disk"
   type        = string
@@ -226,6 +237,12 @@ variable "ipv4_gateway" {
   description = "The IPv4 gateway for the VM"
   type        = string
   default     = null
+}
+
+variable "additional_ipv4_addresses" {
+  description = "List of additional IPv4 addresses for the VM (no gateway)"
+  type        = list(string)
+  default     = []
 }
 
 variable "ipv6_address" {

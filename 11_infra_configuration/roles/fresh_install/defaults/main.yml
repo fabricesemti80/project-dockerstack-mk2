@@ -75,6 +75,10 @@ nfs_share_server: "10.0.40.2"
 nfs_share_path: "/media"
 nfs_mount_point: "/data/media"
 
+# CephFS Configuration
+ceph_monitors: "10.0.40.11,10.0.40.12,10.0.40.13"
+ceph_secret_key: "{{ lookup('env', 'CEPH_SECRET_KEY') | default('') }}"
+
 role_pip_packages:
   - setuptools
   - pynvim

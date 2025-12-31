@@ -32,6 +32,10 @@
     - inventory_hostname in groups['proxmox_vms']
     - install_storage | default(true) | bool
 
+  when: 
+    - inventory_hostname in groups['proxmox_vms']
+    - install_storage | default(true) | bool
+
 - name: Python setup
   include_tasks: python_setup.yml
   tags: [always, python]

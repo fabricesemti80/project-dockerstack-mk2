@@ -1,0 +1,98 @@
+---
+- name: Install ceph-common package
+  ansible.builtin.apt:
+    name: ceph-common
+    state: present
+  tags: [cephfs]
+
+- name: Create Ceph credential directory
+  ansible.builtin.file:
+    path: "/etc/ceph"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  tags: [cephfs]
+
+- name: Create Ceph configuration file
+  ansible.builtin.template:
+    src: ceph.conf.j2
+    dest: "/etc/ceph/ceph.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  tags: [cephfs]
+
+- name: Create Ceph admin secret file
+  ansible.builtin.template:
+    src: ceph_admin.secret.j2
+    dest: "/etc/ceph/{{ cephfs_user }}.secret"
+    owner: root
+    group: root
+    mode: '0600'
+  no_log: true
+  tags: [cephfs]
+
+- name: Create Ceph admin keyring
+  ansible.builtin.template:
+    src: ceph.client.admin.keyring.j2
+    dest: "/etc/ceph/ceph.client.{{ cephfs_user }}.keyring"
+    owner: root
+    group: root
+    mode: '0600'
+  no_log: true
+  tags: [cephfs]
+
+- name: Create mount point directory
+  ansible.builtin.file:
+    path: "{{ cephfs_mount_point }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0755'
+  tags: [cephfs]
+
+- name: Check if CephFS is already mounted
+  ansible.builtin.shell: "mountpoint -q {{ cephfs_mount_point }}"
+  register: mount_check
+  failed_when: false
+  changed_when: false
+  tags: [cephfs]
+
+- name: Mount CephFS
+  ansible.posix.mount:
+    path: "{{ cephfs_mount_point }}"
+    src: "{{ cephfs_monitors }}:{{ cephfs_path }}"
+    fstype: ceph
+    opts: "{{ cephfs_mount_options }}"
+    state: mounted
+  when: mount_check.rc != 0
+  tags: [cephfs]
+
+- name: Ensure CephFS is in fstab
+  ansible.posix.mount:
+    path: "{{ cephfs_mount_point }}"
+    src: "{{ cephfs_monitors }}:{{ cephfs_path }}"
+    fstype: ceph
+    opts: "{{ cephfs_mount_options }}"
+    state: present
+  tags: [cephfs]
+
+- name: Set ownership on shared storage root
+  ansible.builtin.file:
+    path: "{{ cephfs_mount_point }}"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0755'
+    recurse: no
+  tags: [cephfs]
+
+- name: Create application directories on shared storage
+  ansible.builtin.file:
+    path: "{{ cephfs_mount_point }}/{{ item }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0755'
+  loop: "{{ cephfs_app_dirs }}"
+  tags: [cephfs, create_dirs]

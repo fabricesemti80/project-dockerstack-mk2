@@ -71,6 +71,13 @@
       ansible.builtin.include_role:
         name: fresh_install
       ignore_errors: "{{ ansible_check_mode }}"
+      tags: [fresh_install, storage]
+
+    - name: "Apply CephFS mount role"
+      ansible.builtin.include_role:
+        name: cephfs_mount
+      when: inventory_hostname in groups['proxmox_vms']
+      tags: [cephfs, storage]
 
   post_tasks:
     - name: "Final Portainer Information"

@@ -1,0 +1,8 @@
+[global]
+    mon_host = {{ ceph_monitors }}
+    auth_cluster_required = cephx
+    auth_service_required = cephx
+    auth_client_required = cephx
+
+[client]
+    client_mount_timeout = 15

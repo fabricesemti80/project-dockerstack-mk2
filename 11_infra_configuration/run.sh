@@ -33,4 +33,5 @@ ansible-playbook -i "$INVENTORY" "$PLAYBOOK" \
     -e "apps_domain=${DOMAIN}" \
     -e "domain_ops=${DOMAIN_OPS}" \
     -e "domain_media=${DOMAIN_MEDIA}" \
+    -e "ceph_secret_key='${CEPH_SECRET_KEY}'" \
     "$@"

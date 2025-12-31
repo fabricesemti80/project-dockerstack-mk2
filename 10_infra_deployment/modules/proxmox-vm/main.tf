@@ -125,6 +125,16 @@ resource "proxmox_virtual_environment_vm" "vm" {
     firewall = var.network_firewall
   }
 
+  dynamic "network_device" {
+    for_each = var.additional_networks
+    content {
+      bridge   = network_device.value.bridge
+      model    = network_device.value.model
+      vlan_id  = network_device.value.vlan_id
+      firewall = network_device.value.firewall
+    }
+  }
+
   initialization {
     datastore_id = var.initialization_datastore_id
     dns {
@@ -132,23 +142,21 @@ resource "proxmox_virtual_environment_vm" "vm" {
     }
     user_data_file_id = var.user_data != null ? proxmox_virtual_environment_file.user_data[0].id : var.initialization_user_data_file_id
 
-    dynamic "ip_config" {
-      for_each = [1]  # Always create this block
-      content {
-        dynamic "ipv4" {
-          for_each = var.ipv4_address != null ? [1] : []
-          content {
-            address = var.ipv4_address
-            gateway = var.ipv4_gateway
-          }
+    ip_config {
+      dynamic "ipv4" {
+        for_each = var.ipv4_address != null ? [1] : []
+        content {
+          address = var.ipv4_address
+          gateway = var.ipv4_gateway
         }
+      }
+    }
 
-        dynamic "ipv6" {
-          for_each = var.ipv6_address != null ? [1] : []
-          content {
-            address = var.ipv6_address
-            gateway = var.ipv6_gateway
-          }
+    dynamic "ip_config" {
+      for_each = var.additional_ipv4_addresses
+      content {
+        ipv4 {
+          address = ip_config.value
         }
       }
     }
@@ -184,6 +192,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
     ignore_changes = [
       efi_disk,
       tpm_state,
+      initialization[0].user_account,
     ]
   }
 }

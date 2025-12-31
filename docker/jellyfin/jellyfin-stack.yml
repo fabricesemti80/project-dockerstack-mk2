@@ -1,4 +1,4 @@
-# Jellyfin - Media Server (Performance Optimized)
+# Jellyfin - Media Server (Shared CephFS Storage)
 # https://jellyfin.org/
 
 version: "3.9"
@@ -9,14 +9,14 @@ services:
     networks:
       - proxy
     volumes:
-      # Performance: Config and Cache on local LVM storage
+      # Shared CephFS persistence for all Proxmox nodes
       - type: bind
-        source: /data/homelab/jellyfin/config
+        source: /data/homelab/jellyfin
         target: /config
       - type: bind
-        source: /data/homelab/jellyfin/cache
+        source: /data/homelab/volumes/jellyfin-cache
         target: /cache
-      # Library: Shared NFS storage
+      # Library remains on large NFS share
       - type: bind
         source: /data/media
         target: /media
@@ -35,7 +35,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == dkr-srv-3
+          - node.labels.proxmox == true
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=proxy"

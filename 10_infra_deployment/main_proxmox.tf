@@ -65,205 +65,242 @@ locals {
   }
 
   # VM-specific configurations
-  dkr_srv_1 = {
-    name         = "dkr-srv-1"
-    vm_id        = 3011
-    node_name    = "pve-0"
-    ipv4_address = "10.0.30.11/24"
-    ipv4_gateway = "10.0.30.1"
+    dkr_srv_1 = {
+      name         = "dkr-srv-1"
+      vm_id        = 3011
+      node_name    = "pve-0"
+      ipv4_address = "10.0.30.11/24"
+      ipv4_gateway = "10.0.30.1"
+      storage_ipv4 = "10.0.70.1/24"
+    }
+  
+    dkr_srv_2 = {
+      name         = "dkr-srv-2"
+      vm_id        = 3012
+      node_name    = "pve-1"
+      ipv4_address = "10.0.30.12/24"
+      ipv4_gateway = "10.0.30.1"
+      storage_ipv4 = "10.0.70.2/24"
+    }
+  
+    dkr_srv_3 = {
+      name         = "dkr-srv-3"
+      vm_id        = 3013
+      node_name    = "pve-2"
+      ipv4_address = "10.0.30.13/24"
+      ipv4_gateway = "10.0.30.1"
+      storage_ipv4 = "10.0.70.3/24"
+    }
   }
-
-  dkr_srv_2 = {
-    name         = "dkr-srv-2"
-    vm_id        = 3012
-    node_name    = "pve-1"
-    ipv4_address = "10.0.30.12/24"
-    ipv4_gateway = "10.0.30.1"
+  
+  module "dkr_srv_1" {
+    source = "./modules/proxmox-vm"
+  
+    # Basic Configuration
+    name        = local.dkr_srv_1.name
+    description = local.vm_common.description
+    tags        = local.vm_common.tags
+    node_name   = local.dkr_srv_1.node_name
+    vm_id       = local.dkr_srv_1.vm_id
+    # Clone Configuration
+    template_vm_id     = local.vm_common.template_vm_id
+    template_node_name = local.vm_common.template_node_name
+    full_clone         = local.vm_common.full_clone
+  
+    # Agent Configuration
+    agent_enabled = local.vm_common.agent_enabled
+    agent_timeout = local.vm_common.agent_timeout
+  
+    # Hardware Configuration
+    memory_dedicated = local.vm_common.memory_dedicated
+    cpu_cores        = local.vm_common.cpu_cores
+    cpu_sockets      = local.vm_common.cpu_sockets
+  
+    # Disk Configuration
+    disk_datastore_id = local.vm_common.disk_datastore_id
+    disk_interface    = local.vm_common.disk_interface
+    disk_size         = local.vm_common.disk_size
+    disk_iothread     = local.vm_common.disk_iothread
+    additional_disks  = local.vm_common.additional_disks
+  
+    # Network Configuration
+    network_bridge   = local.vm_common.network_bridge
+    network_model    = local.vm_common.network_model
+    network_vlan_id  = local.vm_common.network_vlan_id
+    network_firewall = local.vm_common.network_firewall
+  
+    # Storage Network (Ceph)
+    additional_networks = [
+      {
+        bridge   = "vmbr1"
+        model    = "virtio"
+        vlan_id  = null
+        firewall = false
+      }
+    ]
+    additional_ipv4_addresses = [local.dkr_srv_1.storage_ipv4]
+  
+    # SSH Keys - include both keys
+    # SSH Keys - include both keys
+    ssh_keys = var.ssh_public_keys
+  
+    # User Configuration
+    username = var.ci_user
+  
+    # Initialization Configuration
+    initialization_datastore_id = local.vm_common.initialization_datastore_id
+    dns_servers                 = local.vm_common.dns_servers
+    ipv4_address                = local.dkr_srv_1.ipv4_address
+    ipv4_gateway                = local.dkr_srv_1.ipv4_gateway
+  
+    # VM Lifecycle Settings
+    on_boot             = local.vm_common.on_boot
+    reboot_after_update = local.vm_common.reboot_after_update
+    started             = local.vm_common.started
+  
+    # EFI and TPM
+    efi_disk_enabled  = local.vm_common.efi_disk_enabled
+    tpm_state_enabled = local.vm_common.tpm_state_enabled
   }
-
-  dkr_srv_3 = {
-    name         = "dkr-srv-3"
-    vm_id        = 3013
-    node_name    = "pve-2"
-    ipv4_address = "10.0.30.13/24"
-    ipv4_gateway = "10.0.30.1"
+  
+  module "dkr_srv_2" {
+    source = "./modules/proxmox-vm"
+  
+    # Basic Configuration
+    name        = local.dkr_srv_2.name
+    description = local.vm_common.description
+    tags        = local.vm_common.tags
+    node_name   = local.dkr_srv_2.node_name
+    vm_id       = local.dkr_srv_2.vm_id
+    # Clone Configuration
+    template_vm_id     = local.vm_common.template_vm_id
+    template_node_name = local.vm_common.template_node_name
+    full_clone         = local.vm_common.full_clone
+  
+    # Agent Configuration
+    agent_enabled = local.vm_common.agent_enabled
+    agent_timeout = local.vm_common.agent_timeout
+  
+    # Hardware Configuration
+    memory_dedicated = local.vm_common.memory_dedicated
+    cpu_cores        = local.vm_common.cpu_cores
+    cpu_sockets      = local.vm_common.cpu_sockets
+  
+    # Disk Configuration
+    disk_datastore_id = local.vm_common.disk_datastore_id
+    disk_interface    = local.vm_common.disk_interface
+    disk_size         = local.vm_common.disk_size
+    disk_iothread     = local.vm_common.disk_iothread
+    additional_disks  = local.vm_common.additional_disks
+  
+    # Network Configuration
+    network_bridge   = local.vm_common.network_bridge
+    network_model    = local.vm_common.network_model
+    network_vlan_id  = local.vm_common.network_vlan_id
+    network_firewall = local.vm_common.network_firewall
+  
+    # Storage Network (Ceph)
+    additional_networks = [
+      {
+        bridge   = "vmbr1"
+        model    = "virtio"
+        vlan_id  = null
+        firewall = false
+      }
+    ]
+    additional_ipv4_addresses = [local.dkr_srv_2.storage_ipv4]
+  
+    # SSH Keys
+    # SSH Keys - include both keys
+    ssh_keys = var.ssh_public_keys
+  
+    # User Configuration
+    username = var.ci_user
+  
+    # Initialization Configuration
+    initialization_datastore_id = local.vm_common.initialization_datastore_id
+    dns_servers                 = local.vm_common.dns_servers
+    ipv4_address                = local.dkr_srv_2.ipv4_address
+    ipv4_gateway                = local.dkr_srv_2.ipv4_gateway
+  
+    # VM Lifecycle Settings
+    on_boot             = local.vm_common.on_boot
+    reboot_after_update = local.vm_common.reboot_after_update
+    started             = local.vm_common.started
+  
+    # EFI and TPM
+    efi_disk_enabled  = local.vm_common.efi_disk_enabled
+    tpm_state_enabled = local.vm_common.tpm_state_enabled
   }
-}
-
-module "dkr_srv_1" {
-  source = "./modules/proxmox-vm"
-
-  # Basic Configuration
-  name        = local.dkr_srv_1.name
-  description = local.vm_common.description
-  tags        = local.vm_common.tags
-  node_name   = local.dkr_srv_1.node_name
-  vm_id       = local.dkr_srv_1.vm_id
-  # Clone Configuration
-  template_vm_id     = local.vm_common.template_vm_id
-  template_node_name = local.vm_common.template_node_name
-  full_clone         = local.vm_common.full_clone
-
-  # Agent Configuration
-  agent_enabled = local.vm_common.agent_enabled
-  agent_timeout = local.vm_common.agent_timeout
-
-  # Hardware Configuration
-  memory_dedicated = local.vm_common.memory_dedicated
-  cpu_cores        = local.vm_common.cpu_cores
-  cpu_sockets      = local.vm_common.cpu_sockets
-
-  # Disk Configuration
-  disk_datastore_id = local.vm_common.disk_datastore_id
-  disk_interface    = local.vm_common.disk_interface
-  disk_size         = local.vm_common.disk_size
-  disk_iothread     = local.vm_common.disk_iothread
-  additional_disks  = local.vm_common.additional_disks
-
-  # Network Configuration
-  network_bridge   = local.vm_common.network_bridge
-  network_model    = local.vm_common.network_model
-  network_vlan_id  = local.vm_common.network_vlan_id
-  network_firewall = local.vm_common.network_firewall
-
-  # SSH Keys - include both keys
-  # SSH Keys - include both keys
-  ssh_keys = var.ssh_public_keys
-
-  # User Configuration
-  username = var.ci_user
-
-  # Initialization Configuration
-  initialization_datastore_id = local.vm_common.initialization_datastore_id
-  dns_servers                 = local.vm_common.dns_servers
-  ipv4_address                = local.dkr_srv_1.ipv4_address
-  ipv4_gateway                = local.dkr_srv_1.ipv4_gateway
-
-  # VM Lifecycle Settings
-  on_boot             = local.vm_common.on_boot
-  reboot_after_update = local.vm_common.reboot_after_update
-  started             = local.vm_common.started
-
-  # EFI and TPM
-  efi_disk_enabled  = local.vm_common.efi_disk_enabled
-  tpm_state_enabled = local.vm_common.tpm_state_enabled
-}
-
-module "dkr_srv_2" {
-  source = "./modules/proxmox-vm"
-
-  # Basic Configuration
-  name        = local.dkr_srv_2.name
-  description = local.vm_common.description
-  tags        = local.vm_common.tags
-  node_name   = local.dkr_srv_2.node_name
-  vm_id       = local.dkr_srv_2.vm_id
-  # Clone Configuration
-  template_vm_id     = local.vm_common.template_vm_id
-  template_node_name = local.vm_common.template_node_name
-  full_clone         = local.vm_common.full_clone
-
-  # Agent Configuration
-  agent_enabled = local.vm_common.agent_enabled
-  agent_timeout = local.vm_common.agent_timeout
-
-  # Hardware Configuration
-  memory_dedicated = local.vm_common.memory_dedicated
-  cpu_cores        = local.vm_common.cpu_cores
-  cpu_sockets      = local.vm_common.cpu_sockets
-
-  # Disk Configuration
-  disk_datastore_id = local.vm_common.disk_datastore_id
-  disk_interface    = local.vm_common.disk_interface
-  disk_size         = local.vm_common.disk_size
-  disk_iothread     = local.vm_common.disk_iothread
-  additional_disks  = local.vm_common.additional_disks
-
-  # Network Configuration
-  network_bridge   = local.vm_common.network_bridge
-  network_model    = local.vm_common.network_model
-  network_vlan_id  = local.vm_common.network_vlan_id
-  network_firewall = local.vm_common.network_firewall
-
-  # SSH Keys
-  # SSH Keys - include both keys
-  ssh_keys = var.ssh_public_keys
-
-  # User Configuration
-  username = var.ci_user
-
-  # Initialization Configuration
-  initialization_datastore_id = local.vm_common.initialization_datastore_id
-  dns_servers                 = local.vm_common.dns_servers
-  ipv4_address                = local.dkr_srv_2.ipv4_address
-  ipv4_gateway                = local.dkr_srv_2.ipv4_gateway
-
-  # VM Lifecycle Settings
-  on_boot             = local.vm_common.on_boot
-  reboot_after_update = local.vm_common.reboot_after_update
-  started             = local.vm_common.started
-
-  # EFI and TPM
-  efi_disk_enabled  = local.vm_common.efi_disk_enabled
-  tpm_state_enabled = local.vm_common.tpm_state_enabled
-}
-
-module "dkr_srv_3" {
-  source = "./modules/proxmox-vm"
-
-  # Basic Configuration
-  name        = local.dkr_srv_3.name
-  description = local.vm_common.description
-  tags        = local.vm_common.tags
-  node_name   = local.dkr_srv_3.node_name
-  vm_id       = local.dkr_srv_3.vm_id
-
-  # Clone Configuration
-  template_vm_id     = local.vm_common.template_vm_id
-  template_node_name = local.vm_common.template_node_name
-  full_clone         = local.vm_common.full_clone
-
-  # Agent Configuration
-  agent_enabled = local.vm_common.agent_enabled
-  agent_timeout = local.vm_common.agent_timeout
-
-  # Hardware Configuration
-  memory_dedicated = local.vm_common.memory_dedicated
-  cpu_cores        = local.vm_common.cpu_cores
-  cpu_sockets      = local.vm_common.cpu_sockets
-
-  # Disk Configuration
-  disk_datastore_id = local.vm_common.disk_datastore_id
-  disk_interface    = local.vm_common.disk_interface
-  disk_size         = local.vm_common.disk_size
-  disk_iothread     = local.vm_common.disk_iothread
-  additional_disks  = local.vm_common.additional_disks
-
-  # Network Configuration
-  network_bridge   = local.vm_common.network_bridge
-  network_model    = local.vm_common.network_model
-  network_vlan_id  = local.vm_common.network_vlan_id
-  network_firewall = local.vm_common.network_firewall
-
-  # SSH Keys
-  # SSH Keys - include both keys
-  ssh_keys = var.ssh_public_keys
-
-  # User Configuration
-  username = var.ci_user
-
-  # Initialization Configuration
-  initialization_datastore_id = local.vm_common.initialization_datastore_id
-  dns_servers                 = local.vm_common.dns_servers
-  ipv4_address                = local.dkr_srv_3.ipv4_address
-  ipv4_gateway                = local.dkr_srv_3.ipv4_gateway
-
-  # VM Lifecycle Settings
-  on_boot             = local.vm_common.on_boot
-  reboot_after_update = local.vm_common.reboot_after_update
-  started             = local.vm_common.started
-
-  # EFI and TPM
-  efi_disk_enabled  = local.vm_common.efi_disk_enabled
-  tpm_state_enabled = local.vm_common.tpm_state_enabled
-}
+  
+  module "dkr_srv_3" {
+    source = "./modules/proxmox-vm"
+  
+    # Basic Configuration
+    name        = local.dkr_srv_3.name
+    description = local.vm_common.description
+    tags        = local.vm_common.tags
+    node_name   = local.dkr_srv_3.node_name
+    vm_id       = local.dkr_srv_3.vm_id
+  
+    # Clone Configuration
+    template_vm_id     = local.vm_common.template_vm_id
+    template_node_name = local.vm_common.template_node_name
+    full_clone         = local.vm_common.full_clone
+  
+    # Agent Configuration
+    agent_enabled = local.vm_common.agent_enabled
+    agent_timeout = local.vm_common.agent_timeout
+  
+    # Hardware Configuration
+    memory_dedicated = local.vm_common.memory_dedicated
+    cpu_cores        = local.vm_common.cpu_cores
+    cpu_sockets      = local.vm_common.cpu_sockets
+  
+    # Disk Configuration
+    disk_datastore_id = local.vm_common.disk_datastore_id
+    disk_interface    = local.vm_common.disk_interface
+    disk_size         = local.vm_common.disk_size
+    disk_iothread     = local.vm_common.disk_iothread
+    additional_disks  = local.vm_common.additional_disks
+  
+    # Network Configuration
+    network_bridge   = local.vm_common.network_bridge
+    network_model    = local.vm_common.network_model
+    network_vlan_id  = local.vm_common.network_vlan_id
+    network_firewall = local.vm_common.network_firewall
+  
+    # Storage Network (Ceph)
+    additional_networks = [
+      {
+        bridge   = "vmbr1"
+        model    = "virtio"
+        vlan_id  = null
+        firewall = false
+      }
+    ]
+    additional_ipv4_addresses = [local.dkr_srv_3.storage_ipv4]
+  
+    # SSH Keys
+    # SSH Keys - include both keys
+    ssh_keys = var.ssh_public_keys
+  
+    # User Configuration
+    username = var.ci_user
+  
+    # Initialization Configuration
+    initialization_datastore_id = local.vm_common.initialization_datastore_id
+    dns_servers                 = local.vm_common.dns_servers
+    ipv4_address                = local.dkr_srv_3.ipv4_address
+    ipv4_gateway                = local.dkr_srv_3.ipv4_gateway
+  
+    # VM Lifecycle Settings
+    on_boot             = local.vm_common.on_boot
+    reboot_after_update = local.vm_common.reboot_after_update
+    started             = local.vm_common.started
+  
+    # EFI and TPM
+    efi_disk_enabled  = local.vm_common.efi_disk_enabled
+    tpm_state_enabled = local.vm_common.tpm_state_enabled
+  }
+  
