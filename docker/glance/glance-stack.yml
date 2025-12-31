@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  glance:
+    image: glanceapp/glance:latest
+    networks:
+      - traefik_traefik-public
+    configs:
+      - source: glance_config
+        target: /app/config/glance.yml
+    volumes:
+      - glance-data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=Europe/London
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.cloud == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.glance.rule=Host(`glance.${DOMAIN}`)"
+        - "traefik.http.routers.glance.entrypoints=websecure"
+        - "traefik.http.routers.glance.tls.certresolver=cloudflare"
+        - "traefik.http.services.glance.loadbalancer.server.port=8080"
+
+        # Homepage Dashboard
+        - "homepage.group=Management"
+        - "homepage.name=Glance"
+        - "homepage.icon=glance.png"
+        - "homepage.href=https://glance.${DOMAIN}"
+        - "homepage.description=Dashboard"
+
+configs:
+  glance_config:
+    file: ./glance.yml
+
+volumes:
+  glance-data:
+
+networks:
+  traefik_traefik-public:
+    external: true

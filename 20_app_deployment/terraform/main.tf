@@ -157,6 +157,28 @@ resource "portainer_stack" "homepage" {
   depends_on = [portainer_stack.traefik]
 }
 
+resource "portainer_stack" "glance" {
+  endpoint_id               = var.endpoint_id
+  name                      = "glance"
+  method                    = "repository"
+  deployment_type           = "swarm"
+  repository_url            = var.repository_url
+  repository_reference_name = var.repository_branch
+  file_path_in_repository   = "docker/glance/glance-stack.yml"
+  force_update              = true
+  pull_image                = true
+  prune                     = true
+  update_interval           = "5m"
+  stack_webhook             = true
+
+  env {
+    name  = "DOMAIN"
+    value = var.apps_domain
+  }
+
+  depends_on = [portainer_stack.traefik]
+}
+
 resource "portainer_stack" "jellyfin" {
   endpoint_id               = var.endpoint_id
   name                      = "jellyfin"

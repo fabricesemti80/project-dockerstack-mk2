@@ -1,0 +1,52 @@
+theme:
+  background-color: "225 14% 15%"
+  primary-color: "157 47% 65%"
+  contrast-multiplier: 1.1
+
+pages:
+  - name: Dashboard
+    columns:
+      - size: small
+        widgets:
+          - type: clock
+            time-format: "15:04"
+          - type: calendar
+          - type: weather
+            location: London, United Kingdom
+      
+      - size: full
+        widgets:
+          - type: search
+          - type: bookmarks
+            groups:
+              - title: Infrastructure
+                links:
+                  - title: Traefik
+                    url: https://traefik.${DOMAIN}
+                  - title: Homepage
+                    url: https://home.${DOMAIN}
+                  - title: Portainer
+                    url: https://portainer.${DOMAIN}
+                  - title: Beszel
+                    url: https://beszel.${DOMAIN}
+          
+          - type: monitor
+            title: Service Health
+            cache: 1m
+            services:
+              - name: Traefik
+                url: https://traefik.${DOMAIN}
+              - name: Homepage
+                url: https://home.${DOMAIN}
+              - name: Portainer
+                url: https://portainer.${DOMAIN}
+              - name: Beszel
+                url: https://beszel.${DOMAIN}
+
+      - size: small
+        widgets:
+          - type: hacker-news
+            limit: 10
+            collapse-after: 5
+          - type: docker-containers
+            hide-by-default: false
