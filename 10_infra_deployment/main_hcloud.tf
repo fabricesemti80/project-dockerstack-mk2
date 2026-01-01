@@ -1,4 +1,10 @@
+data "http" "my_public_ip" {
+  url = "https://ipv4.icanhazip.com/"
+}
+
 locals {
+  my_ip = "${chomp(data.http.my_public_ip.response_body)}/32"
+
   dkr_srv_0 = {
     name           = "dkr-srv-0"
     image          = "ubuntu-22.04"
@@ -15,50 +21,50 @@ locals {
       direction  = "in"
       protocol   = "tcp"
       port       = "22"
-      source_ips = ["0.0.0.0/0", "::/0"]
+      source_ips = [local.my_ip] #! This restricts acces to only my [all time updated] public IP!
     },
     {
       direction  = "in"
       protocol   = "tcp"
       port       = "80"
-      source_ips = ["0.0.0.0/0", "::/0"]
+      source_ips = [local.my_ip] #! This restricts acces to only my [all time updated] public IP!
     },
     {
       direction  = "in"
       protocol   = "tcp"
       port       = "443"
-      source_ips = ["0.0.0.0/0", "::/0"]
+      source_ips = [local.my_ip] #! This restricts acces to only my [all time updated] public IP!
     },
-    {
-      direction  = "in"
-      protocol   = "tcp"
-      port       = "3000" # dokply UI default port
-      source_ips = ["0.0.0.0/0", "::/0"]
-    },
-    {
-      direction  = "in"
-      protocol   = "tcp"
-      port       = "9120" # komodo
-      source_ips = ["0.0.0.0/0", "::/0"]
-    },
+    # {
+    #   direction  = "in"
+    #   protocol   = "tcp"
+    #   port       = "3000" # dokply UI default port
+    #   source_ips = [local.my_ip]
+    # },
+    # {
+    #   direction  = "in"
+    #   protocol   = "tcp"
+    #   port       = "9120" # komodo
+    #   source_ips = [local.my_ip]
+    # },
     {
       direction  = "in"
       protocol   = "tcp"
       port       = "9443" # Portainer HTTPs
-      source_ips = ["0.0.0.0/0", "::/0"]
+      source_ips = [local.my_ip]
     },
     {
       direction  = "in"
       protocol   = "tcp"
       port       = "9000" # Portainer HTTP
-      source_ips = ["0.0.0.0/0", "::/0"]
-    },
-    {
-      direction  = "in"
-      protocol   = "tcp"
-      port       = "8080" # Test App port
-      source_ips = ["0.0.0.0/0", "::/0"]
-    }
+      source_ips = [local.my_ip]
+    } ,
+    # {
+    #   direction  = "in"
+    #   protocol   = "tcp"
+    #   port       = "8080" # Test App port
+    #   source_ips = [local.my_ip]
+    # }
   ]
 }
 

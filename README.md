@@ -4,7 +4,11 @@ A comprehensive Infrastructure as Code (IaC) and configuration management soluti
 
 ## Design choices
 
-- I have chosen Hetzner Cloud to provide a fairly affordable cloud VM; which I use as the leader of my Docker swarm. This gives me a level of security, as I will have my swarm still existing if anything happens with my local nodes (I plan to deploy multiple VM-s in Hetzner eventually for HA)
+- I have chosen Hetzner Cloud to provide a fairly affordable cloud VM; which I use as the leader of my Docker swarm. This gives me a level of security, as I will have my swarm still existing if anything happens with my local nodes (I plan to deploy multiple VM-s in Hetzner eventually for HA); access to this node is limited / secured by the following ways:
+  - 1. During the installation - before Tailscale install and Traefik present - I must be able to access the node's public IP; however that does not mean we want this to be exposed --> hence the initial deployment restricts the source IP-s allowed to my public IP
+  - 2. Once Tailscale is installed, I generally use this - given that is installed on my laptop/mobile/PC - primarily
+  - 3. For applications, the access is via Cloudflared tunnel, secured by oAuth application (and complex additional passwords)
+  - Is this 100% secure? Probably not. But *good enough*.
 - The bulk of the work is however done by nodes - VM-s - running in my home environment; these VM-s are running on a 3-node Proxmox cluster, based on Ceph storage, so they are as HA as can be; they are also spread out on the nodes and I can easily spin up more of these and/or replace them if needed
 - Gluing the hybrid swarm together is Tailscale, which allows me to have a swarm without port forwarding (and I can also access certain services via the Tailnet rather than the open Internet)
 - For data protection I use:
