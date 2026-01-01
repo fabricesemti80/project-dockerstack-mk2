@@ -5,8 +5,6 @@
   loop:
     - "/data/homelab"
     - "/data/media"
-    - "/data/torrents"
-    - "/data/usenet"
   register: homelab_paths_stat
 
 - name: Remove files/links blocking homelab directories
@@ -28,8 +26,6 @@
   loop:
     - "/data/homelab"
     - "/data/media"
-    - "/data/torrents"
-    - "/data/usenet"
 
 - name: Set directory permissions (non-recursive for media)
   ansible.builtin.file:
@@ -41,8 +37,6 @@
   loop:
     - "/data/homelab"
     - "/data/media"
-    - "/data/torrents"
-    - "/data/usenet"
 
 - name: Create README files for each directory
   ansible.builtin.copy:
@@ -68,25 +62,8 @@
     - name: "Media Directory"
       path: "/data/media"
       description: "All media content (movies, TV shows, videos)"
-    - name: "Torrents"
-      path: "/data/torrents"
-      description: "BitTorrent downloads and incomplete files"
-    - name: "Usenet"
-      path: "/data/usenet"
-      description: "Usenet downloads and processing"
   # Don't write README into the media share if it's already mounted
   when: item.path != "/data/media"
-
-- name: Create .gitkeep files
-  ansible.builtin.copy:
-    content: ""
-    dest: "{{ item }}/.gitkeep"
-    owner: "{{ admin_user }}"
-    group: "{{ admin_user }}"
-    mode: '0644'
-  loop:
-    - "/data/torrents"
-    - "/data/usenet"
 
 # - name: Create config directories inside media
 #   ansible.builtin.file:

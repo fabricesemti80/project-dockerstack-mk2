@@ -25,3 +25,48 @@
   ansible.builtin.debug:
     msg: "NFS share {{ nfs_share_server }}:{{ nfs_share_path }} mounted on {{ nfs_mount_point }}"
   when: nfs_mount_result is changed
+
+- name: Create download directories inside media mount
+  ansible.builtin.file:
+    path: "{{ nfs_mount_point }}/{{ item }}"
+    state: directory
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0775'
+  loop:
+    - "torrents"
+    - "usenet"
+  tags: [nfs, media, downloads]
+
+- name: Create README files for download directories
+  ansible.builtin.copy:
+    content: |
+      # {{ item | title }}
+
+      {{ 'BitTorrent downloads' if item == 'torrents' else 'Usenet downloads' }}
+
+      Created by: Ansible homelab setup
+      Storage: NFS Share ({{ nfs_share_server }})
+      Owner: {{ admin_user }}
+
+      Directory managed by Ansible.
+    dest: "{{ nfs_mount_point }}/{{ item }}/README.md"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0644'
+  loop:
+    - "torrents"
+    - "usenet"
+  tags: [nfs, media, downloads]
+
+- name: Create .gitkeep files in download directories
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ nfs_mount_point }}/{{ item }}/.gitkeep"
+    owner: "{{ admin_user }}"
+    group: "{{ admin_user }}"
+    mode: '0644'
+  loop:
+    - "torrents"
+    - "usenet"
+  tags: [nfs, media, downloads]
