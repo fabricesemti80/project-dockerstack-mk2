@@ -80,35 +80,6 @@ services:
         - "homepage.widget.type=traefik"
         - "homepage.widget.url=http://traefik:8080"
 
-  # socket-proxy:
-  #   image: lscr.io/linuxserver/socket-proxy:3.2.3
-  #   environment:
-  #     - ALLOW_START=0
-  #     - ALLOW_STOP=0
-  #     - CONTAINERS=1
-  #     - SERVICES=1
-  #     - TASKS=1
-  #     - IMAGES=1
-  #     - INFO=1
-  #     - NETWORKS=1
-  #     - NODES=1
-  #     - POST=1
-  #     - VOLUMES=1
-  #     - EVENTS=1
-  #     - PING=1
-  #     - VERSION=1
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #   networks:
-  #     - proxy
-  #   deploy:
-  #     mode: replicated
-  #     replicas: 1
-  #     placement:
-  #       constraints:
-  #         - node.role == manager
-  #         - node.labels.cloud == true
-  #         - node.labels.leader == true
   socket-proxy:
     image: tecnativa/docker-socket-proxy:latest
     deploy:
