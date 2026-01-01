@@ -1,19 +1,12 @@
-# Global Widgets
-# https://gethomepage.dev/latest/configs/widgets/
-
-- search:
-    provider: google
-    focus: true
-    target: _blank
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/info-widgets/
 
 - resources:
     cpu: true
     memory: true
     disk: /
 
-- datetime:
-    text_size: xl
-    format:
-      dateStyle: long
-      timeStyle: short
-      hour12: false
+- search:
+    provider: duckduckgo
+    target: _blank
