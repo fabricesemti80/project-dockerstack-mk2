@@ -9,6 +9,7 @@ services:
     networks:
       - proxy
       - portainer_agent_network
+      - socket_proxy
     configs:
       - source: homepage_docker
         target: /app/config/docker.yaml
@@ -53,6 +54,8 @@ networks:
   proxy:
     external: true
   portainer_agent_network:
+    external: true
+  socket_proxy:
     external: true
 
 configs:

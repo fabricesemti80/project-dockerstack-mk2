@@ -5,6 +5,7 @@ services:
     image: glanceapp/glance:latest
     networks:
       - proxy
+      - socket_proxy
     configs:
       - source: glance_config
         target: /app/config/glance.yml
@@ -24,12 +25,13 @@ services:
           - node.role == manager
           - node.labels.cloud == true
       labels:
+        # Traefik Configuration
         - "traefik.enable=true"
         - "traefik.http.routers.glance.rule=Host(`glance.${DOMAIN}`)"
         - "traefik.http.routers.glance.entrypoints=websecure"
         - "traefik.http.routers.glance.tls.certresolver=cloudflare"
         - "traefik.http.services.glance.loadbalancer.server.port=8080"
-
+        
         # Homepage Dashboard
         - "homepage.group=Management"
         - "homepage.name=Glance"
@@ -46,4 +48,6 @@ volumes:
 
 networks:
   proxy:
+    external: true
+  socket_proxy:
     external: true

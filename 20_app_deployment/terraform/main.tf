@@ -49,6 +49,21 @@ resource "portainer_docker_network" "socket_proxy" {
 /* -------------------------------------------------------------------------- */
 /*                                   Stacks                                   */
 /* -------------------------------------------------------------------------- */
+resource "portainer_stack" "socket-proxy" {
+  endpoint_id               = var.endpoint_id
+  name                      = "socket-proxy"
+  method                    = "repository"
+  deployment_type           = "swarm"
+  repository_url            = var.repository_url
+  repository_reference_name = var.repository_branch
+  file_path_in_repository   = "docker/socket-proxy/socket-proxy-stack.yml"
+  force_update              = true
+  pull_image                = true
+  prune                     = true
+  update_interval           = "5m"
+  stack_webhook             = true
+}
+
 resource "portainer_stack" "traefik" {
   endpoint_id               = var.endpoint_id
   name                      = "traefik"
@@ -77,6 +92,8 @@ resource "portainer_stack" "traefik" {
     name  = "DOMAIN"
     value = var.apps_domain
   }
+
+  depends_on = [portainer_stack.socket-proxy]
 }
 
 resource "portainer_stack" "whoami" {

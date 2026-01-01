@@ -54,6 +54,7 @@ services:
 
     networks:
       - proxy
+      - socket_proxy
 
     deploy:
       mode: replicated
@@ -80,47 +81,6 @@ services:
         - "homepage.widget.type=traefik"
         - "homepage.widget.url=http://traefik:8080"
 
-  socket-proxy:
-    image: tecnativa/docker-socket-proxy:latest
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-          - node.labels.cloud == true
-          - node.labels.leader == true
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - CONTAINERS=1
-      - SERVICES=1
-      - TASKS=1
-      - POST=1
-      - EVENTS=1
-      - INFO=1
-      - IMAGES=1
-      - NETWORKS=1
-      - VOLUMES=1
-      - NODES=1
-      - PING=1
-      - VERSION=1
-      - ALLOW_START=1
-      - ALLOW_STOP=1
-      - ALLOW_RESTARTS=1
-      - SWARM=1
-    networks:
-      - proxy
-    logging:
-      driver: json-file
-      options:
-        max-size: "12m"
-        max-file: "5"
-
   logrotate:
     image: vegardit/traefik-logrotate:latest
     environment:
@@ -140,6 +100,7 @@ services:
       - traefik-logs:/var/log/traefik:rw
     networks:
       - proxy
+      - socket_proxy
     deploy:
       mode: replicated
       replicas: 1
@@ -157,6 +118,7 @@ services:
       - traefik-logs:/var/log/traefik:ro
     networks:
       - proxy
+      - socket_proxy
     deploy:
       mode: replicated
       replicas: 1
@@ -172,4 +134,6 @@ volumes:
 
 networks:
   proxy:
+    external: true
+  socket_proxy:
     external: true
