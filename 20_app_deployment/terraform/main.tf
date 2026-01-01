@@ -1,3 +1,8 @@
+/* -------------------------------------------------------------------------- */
+/*                                  Networks                                  */
+/* -------------------------------------------------------------------------- */
+
+/* ----------------- Network for all apps routed via Traefik ---------------- */
 resource "portainer_docker_network" "proxy" {
   endpoint_id = var.endpoint_id
   name        = "proxy"
@@ -19,6 +24,31 @@ resource "portainer_docker_network" "proxy" {
   }
 }
 
+/* ---------- Network for Docker Socket Proxy connected application --------- */
+resource "portainer_docker_network" "socket_proxy" {
+  endpoint_id = var.endpoint_id
+  name        = "socket_proxy"
+  driver      = "overlay"
+  scope       = "swarm"
+  attachable  = true
+  internal    = false
+  ingress     = false
+  enable_ipv4 = true
+
+  ipam_config {
+    subnet = "10.0.200.0/24"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      options
+    ]
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                   Stacks                                   */
+/* -------------------------------------------------------------------------- */
 resource "portainer_stack" "traefik" {
   endpoint_id               = var.endpoint_id
   name                      = "traefik"

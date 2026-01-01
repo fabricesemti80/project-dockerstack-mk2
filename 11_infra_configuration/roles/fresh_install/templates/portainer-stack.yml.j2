@@ -24,7 +24,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - agent_network
-      - portainer_network
+      # - portainer_network
     deploy:
       mode: replicated
       replicas: 1
@@ -47,15 +47,15 @@ services:
         - "homepage.description=Docker Management"
         - "homepage.widget.type=portainer"
         - "homepage.widget.url=http://portainer:9000"
-        - "homepage.widget.key={{ '{{' }}PORTAINER_ACCESS_TOKEN{{ '}}' }}"
+        - "homepage.widget.key={{ '{{' }}HOMEPAGE_VAR_PORTAINER_ACCESS_TOKEN{{ '}}' }}"
         - "homepage.widget.env=1"
 
 networks:
   agent_network:
     driver: overlay
     attachable: true
-  portainer_network:
-    external: true
+  # portainer_network:
+  #   external: true
 
 volumes:
   portainer_data:

@@ -89,11 +89,11 @@
       changed_when: true
       tags: [swarm, labels]
 
-    - name: "Create shared overlay networks"
-      docker_network:
-        name: portainer_network
-        driver: overlay
-        attachable: true
-      ignore_errors: true
-      tags: [swarm, network]
-  when:
+    # - name: "Create shared overlay networks"
+    #   docker_network:
+    #     name: portainer_network
+    #     driver: overlay
+    #     attachable: true
+    #   ignore_errors: true
+    #   tags: [swarm, network]
+  # when:

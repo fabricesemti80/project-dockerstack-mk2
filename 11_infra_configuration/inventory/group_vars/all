@@ -12,6 +12,7 @@ domain_media: "{{ lookup('env', 'DOMAIN_MEDIA') | default('', true) }}"
 admin_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default(omit) }}"
 secondary_password: "{{ lookup('env', 'SECONDARY_PASSWORD') | default(omit) }}"
 portainer_admin_password: "{{ lookup('env', 'PORTAINER_ADMIN_PASSWORD') | default('portainer_admin_password', true) }}"
+portainer_access_token: "{{ lookup('env', 'PORTAINER_ACCESS_TOKEN') | default('', true) }}"
 
 # SSH Keys
 ssh_public_keys: "{{ lookup('env', 'TF_VAR_SSH_PUBLIC_KEYS') | default('[]', true) }}"
