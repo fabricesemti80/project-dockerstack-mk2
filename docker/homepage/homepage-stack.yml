@@ -6,19 +6,10 @@ version: "3.9"
 services:
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
-    placement:
-      constraints:
-        - node.role == manager
-        - node.labels.cloud == true
-        - node.labels.leader == true
     networks:
       - proxy
       - portainer_agent_network
       - socket_proxy
-    restart_policy:
-      condition: on-failure
-      delay: 5s
-      max_attempts: 3
     configs:
       - source: homepage_docker
         target: /app/config/docker.yaml
@@ -36,8 +27,15 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-
-
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.cloud == true
+          - node.labels.leader == true
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       labels:
         # Traefik Configuration
         - "traefik.enable=true"
