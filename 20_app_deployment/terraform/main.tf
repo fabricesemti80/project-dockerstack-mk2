@@ -14,6 +14,7 @@ locals {
   beszel_agent_key        = var.beszel_agent_key
   beszel_agent_token      = var.beszel_agent_token
   portainer_access_token  = var.portainer_access_token
+  homepage_jellyfin_api   = var.homepage_jellyfin_api
   
   # App Specific
   beszel_last_update      = "2025-12-30T17:45:00Z"
@@ -416,6 +417,11 @@ resource "portainer_stack" "jellyfin" {
   env {
     name  = "PGID"
     value = local.pgid
+  }
+
+  env {
+    name  = "JELLYFIN_API_KEY"
+    value = local.homepage_jellyfin_api
   }
 
   depends_on = [portainer_stack.traefik]

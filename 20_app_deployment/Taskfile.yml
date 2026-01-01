@@ -26,6 +26,7 @@ tasks:
           export TF_VAR_apps_domain="$DOMAIN"
           export TF_VAR_beszel_agent_key="$BESZEL_AGENT_KEY"
           export TF_VAR_beszel_agent_token="$BESZEL_AGENT_TOKEN"
+          export TF_VAR_homepage_jellyfin_api="$HOMEPAGE_JELLYFIN_API"
           terraform plan
         '
 
@@ -42,6 +43,7 @@ tasks:
           export TF_VAR_apps_domain="$DOMAIN"
           export TF_VAR_beszel_agent_key="$BESZEL_AGENT_KEY"
           export TF_VAR_beszel_agent_token="$BESZEL_AGENT_TOKEN"
+          export TF_VAR_homepage_jellyfin_api="$HOMEPAGE_JELLYFIN_API"
           terraform apply -auto-approve
         '
 
@@ -58,5 +60,6 @@ tasks:
           export TF_VAR_apps_domain="$DOMAIN"
           export TF_VAR_beszel_agent_key="$BESZEL_AGENT_KEY"
           export TF_VAR_beszel_agent_token="$BESZEL_AGENT_TOKEN"
+          export TF_VAR_homepage_jellyfin_api="$HOMEPAGE_JELLYFIN_API"
           terraform destroy -auto-approve
         '

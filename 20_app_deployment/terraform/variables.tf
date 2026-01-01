@@ -348,6 +348,13 @@ variable "beszel_agent_token" {
 
 
 
+variable "homepage_jellyfin_api" {
+  type        = string
+  description = "Jellyfin API Token for Homepage widget"
+  sensitive   = true
+  default     = ""
+}
+
 variable "repository_url" {
 
 
