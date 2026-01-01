@@ -33,7 +33,7 @@ services:
         # Homepage
         - "homepage.group=Utilities"
         - "homepage.name=Filebrowser"
-        - "homepage.icon=sh-filebrowser"
+        - "homepage.icon=sh-filebrowser-quantum.png"
         - "homepage.href=https://file.${DOMAIN}"
         - "homepage.description=Web File Manager"
 
