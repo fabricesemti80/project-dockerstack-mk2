@@ -21,3 +21,7 @@ cephfs_docker_data_dirs:
   - jellyfin-cache
   - homepage
   - homepage/config
+  - docmost
+  - docmost/postgres
+  - docmost/storage
+  - docmost/redis

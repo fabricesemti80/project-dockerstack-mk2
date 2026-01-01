@@ -15,6 +15,8 @@ locals {
   beszel_agent_token      = var.beszel_agent_token
   portainer_access_token  = var.portainer_access_token
   homepage_jellyfin_api   = var.homepage_jellyfin_api
+  docmost_app_secret      = var.docmost_app_secret
+  docmost_postgres_password = var.docmost_postgres_password
   
   # App Specific
   beszel_last_update      = "2025-12-30T17:45:00Z"
@@ -348,6 +350,53 @@ resource "portainer_stack" "glance" {
   env {
     name  = "PGID"
     value = local.pgid
+  }
+
+  depends_on = [portainer_stack.traefik]
+}
+
+resource "portainer_stack" "docmost" {
+  endpoint_id               = var.endpoint_id
+  name                      = "docmost"
+  method                    = "repository"
+  deployment_type           = "swarm"
+  repository_url            = var.repository_url
+  repository_reference_name = var.repository_branch
+  file_path_in_repository   = "docker/docmost/docmost-stack.yml"
+  force_update              = true
+  pull_image                = true
+  prune                     = true
+  update_interval           = "5m"
+  stack_webhook             = true
+
+  env {
+    name  = "DOMAIN"
+    value = local.domain
+  }
+
+  env {
+    name  = "TZ"
+    value = local.tz
+  }
+
+  env {
+    name  = "PUID"
+    value = local.puid
+  }
+
+  env {
+    name  = "PGID"
+    value = local.pgid
+  }
+
+  env {
+    name  = "DOCMOST_APP_SECRET"
+    value = local.docmost_app_secret
+  }
+
+  env {
+    name  = "DOCMOST_POSTGRES_PASSWORD"
+    value = local.docmost_postgres_password
   }
 
   depends_on = [portainer_stack.traefik]

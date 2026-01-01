@@ -27,6 +27,8 @@ tasks:
           export TF_VAR_beszel_agent_key="$BESZEL_AGENT_KEY"
           export TF_VAR_beszel_agent_token="$BESZEL_AGENT_TOKEN"
           export TF_VAR_homepage_jellyfin_api="$HOMEPAGE_JELLYFIN_API"
+          export TF_VAR_docmost_app_secret="$DOCMOST_APP_SECRET"
+          export TF_VAR_docmost_postgres_password="$DOCMOST_POSTGRES_PASSWORD"
           terraform plan
         '
 
@@ -44,6 +46,8 @@ tasks:
           export TF_VAR_beszel_agent_key="$BESZEL_AGENT_KEY"
           export TF_VAR_beszel_agent_token="$BESZEL_AGENT_TOKEN"
           export TF_VAR_homepage_jellyfin_api="$HOMEPAGE_JELLYFIN_API"
+          export TF_VAR_docmost_app_secret="$DOCMOST_APP_SECRET"
+          export TF_VAR_docmost_postgres_password="$DOCMOST_POSTGRES_PASSWORD"
           terraform apply -auto-approve
         '
 
@@ -61,5 +65,7 @@ tasks:
           export TF_VAR_beszel_agent_key="$BESZEL_AGENT_KEY"
           export TF_VAR_beszel_agent_token="$BESZEL_AGENT_TOKEN"
           export TF_VAR_homepage_jellyfin_api="$HOMEPAGE_JELLYFIN_API"
+          export TF_VAR_docmost_app_secret="$DOCMOST_APP_SECRET"
+          export TF_VAR_docmost_postgres_password="$DOCMOST_POSTGRES_PASSWORD"
           terraform destroy -auto-approve
         '

@@ -355,6 +355,20 @@ variable "homepage_jellyfin_api" {
   default     = ""
 }
 
+variable "docmost_app_secret" {
+  type        = string
+  description = "Docmost App Secret (from Doppler)"
+  sensitive   = true
+  default     = ""
+}
+
+variable "docmost_postgres_password" {
+  type        = string
+  description = "Docmost Postgres Password (from Doppler)"
+  sensitive   = true
+  default     = ""
+}
+
 variable "repository_url" {
 
 
@@ -424,7 +438,3 @@ variable "repository_branch" {
 
 
 }
-
-
-
-
