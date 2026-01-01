@@ -13,7 +13,7 @@ services:
     volumes:
       - type: bind
         source: /data
-        target: /data
+        target: /srv
       - type: bind
         source: /data/homelab/docker-data/filebrowser
         target: /home/filebrowser/data
@@ -33,7 +33,7 @@ services:
         # Homepage
         - "homepage.group=Utilities"
         - "homepage.name=Filebrowser"
-        - "homepage.icon=filebrowser.png"
+        - "homepage.icon=sh-filebrowser"
         - "homepage.href=https://file.${DOMAIN}"
         - "homepage.description=Web File Manager"
 
@@ -72,7 +72,7 @@ services:
         # Homepage
         - "homepage.group=Utilities"
         - "homepage.name=Filerise"
-        - "homepage.icon=filerise.png"
+        - "homepage.icon=mdi-image-multiple"
         - "homepage.href=https://rise.${DOMAIN}"
         - "homepage.description=Photo/File Manager"
 
