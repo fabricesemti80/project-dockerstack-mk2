@@ -72,7 +72,7 @@ services:
         # Homepage
         - "homepage.group=Utilities"
         - "homepage.name=Filerise"
-        - "homepage.icon=mdi-image-multiple"
+        - "homepage.icon=sh-filerise-light.png"
         - "homepage.href=https://rise.${DOMAIN}"
         - "homepage.description=Photo/File Manager"
 
