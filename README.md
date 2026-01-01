@@ -2,6 +2,28 @@
 
 A comprehensive Infrastructure as Code (IaC) and configuration management solution for a hybrid homelab environment spanning Proxmox (on-premises) and Hetzner Cloud.
 
+## Design choices
+
+- I have chosen Hetzner Cloud to provide a fairly affordable cloud VM; which I use as the leader of my Docker swarm. This gives me a level of security, as I will have my swarm still existing if anything happens with my local nodes (I plan to deploy multiple VM-s in Hetzner eventually for HA)
+- The bulk of the work is however done by nodes - VM-s - running in my home environment; these VM-s are running on a 3-node Proxmox cluster, based on Ceph storage, so they are as HA as can be; they are also spread out on the nodes and I can easily spin up more of these and/or replace them if needed
+- Gluing the hybrid swarm together is Tailscale, which allows me to have a swarm without port forwarding (and I can also access certain services via the Tailnet rather than the open Internet)
+- For data protection I use:
+  - A directly mounted file storage from Ceph that has been made available for all Proxmox VM-s; this allows certain services - such as Jellify - to be able to run on any local node ("almost like Kubenetes"); while it certainly is not at automatic like K8s, I am willing to accept this trade versus the complezity of K8S; for this reason the Proxmox VM-s has been set up with a secondary NIC on the Ceph range - `10.0.70.0/24` - in addition to their main IP in `10.0.40.0/24`.
+  - Some data - such as my tv and movie collection - are stored on NFS (which is running on a NAS and backed up from there)
+  - *disclaimer*: I would have prefered to have only NFS, but I found that having Jellyfin's config and cache on NFS just made it unusable
+- I do realise my tooling choices - Terraform and Ansible - used in a quick swap session might be confusing, but it works for me:
+  - 1. I do the deployment of the Github runner and the provisioning of the Proxmox template with Ansible, as these are one-off tasks and it was relatively easy to make the Proxmox template build "indempotent"
+  - 2. But deploying the entire - Cloudflare, Hetzner and Proxmox - infrastructure in one go would have been very challanging - if not impossible - without Terraform, which I use anyway on a daily basis. Therefore I opted for this for the infrastructure building phase
+  - 3. Similarly, configuring the 4 VM-s (especially, as one is Ubuntu and the other 3x are Debian) I found best to be done with Ansible
+  - 4. As for the choice of the Portainer provider for Terraform, while this is a relatively new provider, I found that this is much more efficient to quickly create the stacks compared to the sluggish creation via the Portainer UI (and I admit that I am prone to typos!)
+- Overall my Docker deployment after the initial deployment is fairly simple:
+    - *Run the Ansible task to create the new config / media folder(s) for the new docker stack*
+    - *Add env variables to Doppler secrets*
+    - *Commit Docker stack folder to Github*
+    - *Add stack to Terraform and deploy*
+  -  *(Verify in Portainer)*
+
+
 ## Architecture Overview
 
 ```mermaid
@@ -14,16 +36,20 @@ flowchart TB
 
     subgraph "Infrastructure Layer"
         subgraph "Hetzner Cloud"
-            DKR0["dkr-srv-0<br/>Cloud Leader<br/>157.180.84.140"]
+            DKR0["dkr-srv-0<br/>Cloud Leader"]
         end
         
         subgraph "Proxmox Cluster"
-            PVE0["pve-0"]
-            PVE1["pve-1"]
-            PVE2["pve-2"]
+            PVE0["pve-0<br/>10.0.40.10"]
+            PVE1["pve-1<br/>10.0.40.11"]
+            PVE2["pve-2<br/>10.0.40.12"]
             DKR1["dkr-srv-1<br/>10.0.30.11"]
             DKR2["dkr-srv-2<br/>10.0.30.12"]
             DKR3["dkr-srv-3<br/>10.0.30.13"]
+        end
+
+        subgraph "Storage"
+            CEPH[("Ceph Storage<br/>10.0.70.0/24")]
             NFS[("NFS Media Share<br/>10.0.40.2:/media")]
         end
     end
@@ -93,12 +119,16 @@ flowchart TB
     USR --> CFZ
     LE --> TRF
     
+    CEPH --> DKR1
+    CEPH --> DKR2
+    CEPH --> DKR3
     NFS --> DKR1
     NFS --> DKR2
     NFS --> DKR3
 
     classDef cloud fill:#1a73e8,stroke:#fff,color:#fff
     classDef proxmox fill:#e65100,stroke:#fff,color:#fff
+    classDef storage fill:#e91e63,stroke:#fff,color:#fff
     classDef network fill:#34a853,stroke:#fff,color:#fff
     classDef app fill:#9c27b0,stroke:#fff,color:#fff
     classDef media fill:#00a4dc,stroke:#fff,color:#fff
@@ -107,7 +137,8 @@ flowchart TB
     classDef cicd fill:#f9a825,stroke:#000,color:#000
 
     class DKR0 cloud
-    class PVE0,PVE1,PVE2,DKR1,DKR2,DKR3,NFS proxmox
+    class PVE0,PVE1,PVE2,DKR1,DKR2,DKR3 proxmox
+    class CEPH,NFS storage
     class TS,CF,CFZ network
     class SP,TRF,PTN,CFD,BZL,HP app
     class JF media

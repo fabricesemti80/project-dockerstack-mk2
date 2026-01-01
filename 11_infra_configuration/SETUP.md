@@ -137,9 +137,30 @@ flowchart TB
 
 ## Storage Configuration
 
-### LVM Storage Setup
+### Storage Overview
 
-The playbook configures LVM on the secondary disk (30 GB data disk):
+The Proxmox VMs have access to two types of shared storage:
+
+| Storage Type | Source | Purpose | Availability |
+|:---|:---|:---|:---|
+| **Ceph RBD** | Proxmox Ceph cluster | Docker persistent data | Proxmox VMs only |
+| **NFS** | NAS (10.0.40.2) | Media files | Proxmox VMs only |
+
+### Ceph Storage (Proxmox VMs Only)
+
+Ceph storage is provided by the Proxmox cluster and directly mounted to the Docker VMs. This enables services like Jellyfin to run on any Proxmox node with consistent data access.
+
+| Setting | Value |
+|:---|:---|
+| Ceph Monitors | `10.0.70.10, 10.0.70.11, 10.0.70.12` |
+| Mount Type | CephFS / RBD |
+| Mount Point | `/data/homelab/docker-data` |
+
+> **Note:** Ceph storage is configured at the Proxmox level and mounted into VMs. This allows application data to be available regardless of which Proxmox node the VM runs on.
+
+### LVM Storage Setup (Cloud VM)
+
+For the cloud leader (dkr-srv-0), the playbook configures LVM on the secondary disk:
 
 | Setting | Value |
 |:---|:---|
@@ -149,29 +170,36 @@ The playbook configures LVM on the secondary disk (30 GB data disk):
 | Filesystem | `ext4` |
 | Mount Point | `/data` |
 
-#### Created Directory Structure
+### Directory Structure
 
 ```
-/data/                          # LVM mount point
-├── homelab/                    # Application data root
-│   └── docker-data/            # Docker persistent volumes
-│       ├── radarr/
-│       ├── sonarr/
-│       ├── bazarr/
-│       ├── sabnzbd/
-│       ├── autobrr/
-│       │   └── postgres/
-│       ├── docmost/
-│       │   ├── storage/
-│       │   ├── postgres/
-│       │   └── redis/
-│       ├── filebrowser/
-│       ├── filerise/
-│       │   ├── users/
-│       │   └── metadata/
-│       ├── jellyfin/
-│       └── jellyfin-cache/
-└── media/                      # NFS mount point (Proxmox only)
+/data/                              # Mount point
+├── homelab/                        # Application data root
+│   └── docker-data/                # Docker persistent volumes (Ceph-backed on Proxmox VMs)
+│       ├── radarr/                 # Radarr config
+│       ├── sonarr/                 # Sonarr config
+│       ├── bazarr/                 # Bazarr config
+│       ├── sabnzbd/                # SABnzbd config
+│       ├── autobrr/                # Autobrr config
+│       │   └── postgres/           # Autobrr database
+│       ├── docmost/                # Docmost data
+│       │   ├── storage/            # File uploads
+│       │   ├── postgres/           # Database
+│       │   └── redis/              # Cache
+│       ├── filebrowser/            # Filebrowser config
+│       ├── filerise/               # Filerise data
+│       │   ├── users/              # User configs
+│       │   └── metadata/           # File metadata
+│       ├── jellyfin/               # Jellyfin config & metadata
+│       └── jellyfin-cache/         # Transcoding cache
+│
+└── media/                          # NFS mount point (Proxmox VMs only)
+    ├── torrents/                   # BitTorrent downloads
+    ├── usenet/                     # Usenet downloads
+    ├── Movies/                     # Movie library
+    ├── TV Shows/                   # TV series library
+    ├── Music/                      # Music library
+    └── Photos/                     # Photo library
 ```
 
 ### NFS Media Mount (Proxmox VMs Only)
@@ -185,20 +213,18 @@ The NFS share is mounted only on Proxmox VMs for media access:
 | Mount Point | `/data/media` |
 | Mount Options | `defaults,soft,intr,rsize=8192,wsize=8192` |
 
-#### NFS Directory Structure
-
-The playbook creates these directories in the NFS mount:
+The playbook creates download directories in the NFS mount:
 
 ```
-/data/media/                    # NFS mount from 10.0.40.2:/media
-├── torrents/                   # BitTorrent downloads
+/data/media/                        # NFS mount from 10.0.40.2:/media
+├── torrents/                       # BitTorrent downloads
 │   └── README.md
-├── usenet/                     # Usenet downloads
+├── usenet/                         # Usenet downloads
 │   └── README.md
-├── Movies/                     # Movie library (manual/arr)
-├── TV Shows/                   # TV series library
-├── Music/                      # Music library
-└── Photos/                     # Photo library
+├── Movies/                         # Movie library (manual/arr)
+├── TV Shows/                       # TV series library
+├── Music/                          # Music library
+└── Photos/                         # Photo library
 ```
 
 ## Inventory
