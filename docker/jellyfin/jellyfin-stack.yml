@@ -55,17 +55,21 @@ services:
         - "homepage.group=Docker Apps"
         - "homepage.name=Jellyfin"
         - "homepage.icon=jellyfin.png"
-        # - "homepage.href=https://jellyfin.${DOMAIN}"
+        - "homepage.href=https://jellyfin.${DOMAIN}"
         - "homepage.description=Media Server"
         - "homepage.widget.type=jellyfin"
         - "homepage.widget.url=http://jellyfin:8096"
         - "homepage.widget.key=${JELLYFIN_API_KEY}"
         - "homepage.widget.enableBlocks=true"
-        # - "homepage.widget.enableNowPlaying=true"
+        - "homepage.widget.enableNowPlaying=true"
         # - "homepage.widget.enableUser=true"
         # - "homepage.widget.enableMediaControl=false"
         # - "homepage.widget.showEpisodeNumber=true"
         # - "homepage.widget.expandOneStreamToTwoRows=false"
+
+        - "homepage.siteMonitor=http://jellyfin:8096"
+        - "homepage.weight=8"
+        - "homepage.widget.url=https://jellyfin.${DOMAIN}"
 
 networks:
   proxy:
