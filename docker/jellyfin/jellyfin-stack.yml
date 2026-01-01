@@ -59,7 +59,13 @@ services:
         - "homepage.description=Media Server"
         - "homepage.widget.type=jellyfin"
         - "homepage.widget.url=http://jellyfin:8096"
-        - "homepage.widget.key=${JELLYFIN_API_KEY}" # User must provide this env var if they want the widget
+        - "homepage.widget.key=${JELLYFIN_API_KEY}"
+        - "homepage.widget.enableBlocks=true"
+        - "homepage.widget.enableNowPlaying=true"
+        - "homepage.widget.enableUser=true"
+        - "homepage.widget.enableMediaControl=false"
+        - "homepage.widget.showEpisodeNumber=true"
+        - "homepage.widget.expandOneStreamToTwoRows=false"
 
 networks:
   proxy:
