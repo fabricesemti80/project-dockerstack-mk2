@@ -7,6 +7,10 @@ services:
       sh -c "echo '0 23 * * * docker system prune -af' > /etc/crontabs/root && crond -f -l 8"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
     deploy:
       mode: global
       restart_policy:

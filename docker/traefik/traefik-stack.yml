@@ -43,6 +43,7 @@ services:
 
     environment:
       - CF_DNS_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+      - TZ=${TZ}
 
     ports:
       - "80:80"

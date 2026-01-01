@@ -5,6 +5,10 @@ services:
     image: traefik/whoami
     networks:
       - proxy
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
     deploy:
       replicas: 3
       labels:

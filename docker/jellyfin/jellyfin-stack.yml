@@ -28,8 +28,9 @@ services:
         mode: ingress
     environment:
       - JELLYFIN_PublishedServerUrl=https://jellyfin.${DOMAIN}
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     deploy:
       mode: replicated
       replicas: 1

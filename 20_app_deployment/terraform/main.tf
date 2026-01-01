@@ -1,4 +1,25 @@
 /* -------------------------------------------------------------------------- */
+/*                                   Locals                                   */
+/* -------------------------------------------------------------------------- */
+locals {
+  domain = var.apps_domain
+  tz     = "Europe/London"
+  puid   = 1000
+  pgid   = 1000
+
+  # Secrets & Configs
+  cloudflare_api_token    = var.cloudflare_api_token
+  acme_email              = var.acme_email
+  cloudflare_tunnel_token = var.cloudflare_tunnel_token
+  beszel_agent_key        = var.beszel_agent_key
+  beszel_agent_token      = var.beszel_agent_token
+  portainer_access_token  = var.portainer_access_token
+  
+  # App Specific
+  beszel_last_update      = "2025-12-30T17:45:00Z"
+}
+
+/* -------------------------------------------------------------------------- */
 /*                                  Networks                                  */
 /* -------------------------------------------------------------------------- */
 
@@ -62,6 +83,21 @@ resource "portainer_stack" "socket-proxy" {
   prune                     = true
   update_interval           = "5m"
   stack_webhook             = true
+
+  env {
+    name  = "TZ"
+    value = local.tz
+  }
+
+  env {
+    name  = "PUID"
+    value = local.puid
+  }
+
+  env {
+    name  = "PGID"
+    value = local.pgid
+  }
 }
 
 resource "portainer_stack" "traefik" {
@@ -80,17 +116,32 @@ resource "portainer_stack" "traefik" {
 
   env {
     name  = "CLOUDFLARE_API_TOKEN"
-    value = var.cloudflare_api_token
+    value = local.cloudflare_api_token
   }
 
   env {
     name  = "ACME_EMAIL"
-    value = var.acme_email
+    value = local.acme_email
   }
 
   env {
     name  = "DOMAIN"
-    value = var.apps_domain
+    value = local.domain
+  }
+
+  env {
+    name  = "TZ"
+    value = local.tz
+  }
+
+  env {
+    name  = "PUID"
+    value = local.puid
+  }
+
+  env {
+    name  = "PGID"
+    value = local.pgid
   }
 
   depends_on = [portainer_stack.socket-proxy]
@@ -112,7 +163,22 @@ resource "portainer_stack" "whoami" {
 
   env {
     name  = "DOMAIN"
-    value = var.apps_domain
+    value = local.domain
+  }
+
+  env {
+    name  = "TZ"
+    value = local.tz
+  }
+
+  env {
+    name  = "PUID"
+    value = local.puid
+  }
+
+  env {
+    name  = "PGID"
+    value = local.pgid
   }
 
   depends_on = [portainer_stack.traefik]
@@ -134,7 +200,22 @@ resource "portainer_stack" "cloudflared" {
 
   env {
     name  = "CLOUDFLARE_TUNNEL_TOKEN"
-    value = var.cloudflare_tunnel_token
+    value = local.cloudflare_tunnel_token
+  }
+
+  env {
+    name  = "TZ"
+    value = local.tz
+  }
+
+  env {
+    name  = "PUID"
+    value = local.puid
+  }
+
+  env {
+    name  = "PGID"
+    value = local.pgid
   }
 
   depends_on = [portainer_stack.traefik]
@@ -156,22 +237,37 @@ resource "portainer_stack" "beszel" {
 
   env {
     name  = "DOMAIN"
-    value = var.apps_domain
+    value = local.domain
   }
 
   env {
     name  = "BESZEL_AGENT_KEY"
-    value = var.beszel_agent_key
+    value = local.beszel_agent_key
   }
 
   env {
     name  = "BESZEL_AGENT_TOKEN"
-    value = var.beszel_agent_token
+    value = local.beszel_agent_token
   }
 
   env {
     name  = "LAST_UPDATE"
-    value = "2025-12-30T17:45:00Z"
+    value = local.beszel_last_update
+  }
+
+  env {
+    name  = "TZ"
+    value = local.tz
+  }
+
+  env {
+    name  = "PUID"
+    value = local.puid
+  }
+
+  env {
+    name  = "PGID"
+    value = local.pgid
   }
 
   depends_on = [portainer_stack.traefik]
@@ -193,12 +289,27 @@ resource "portainer_stack" "homepage" {
 
   env {
     name  = "DOMAIN"
-    value = var.apps_domain
+    value = local.domain
   }
 
   env {
     name  = "PORTAINER_ACCESS_TOKEN"
-    value = var.portainer_access_token
+    value = local.portainer_access_token
+  }
+
+  env {
+    name  = "TZ"
+    value = local.tz
+  }
+
+  env {
+    name  = "PUID"
+    value = local.puid
+  }
+
+  env {
+    name  = "PGID"
+    value = local.pgid
   }
 
   depends_on = [portainer_stack.traefik]
@@ -220,7 +331,22 @@ resource "portainer_stack" "glance" {
 
   env {
     name  = "DOMAIN"
-    value = var.apps_domain
+    value = local.domain
+  }
+
+  env {
+    name  = "TZ"
+    value = local.tz
+  }
+
+  env {
+    name  = "PUID"
+    value = local.puid
+  }
+
+  env {
+    name  = "PGID"
+    value = local.pgid
   }
 
   depends_on = [portainer_stack.traefik]
@@ -239,6 +365,21 @@ resource "portainer_stack" "docker-gc" {
   prune                     = true
   update_interval           = "5m"
   stack_webhook             = true
+
+  env {
+    name  = "TZ"
+    value = local.tz
+  }
+
+  env {
+    name  = "PUID"
+    value = local.puid
+  }
+
+  env {
+    name  = "PGID"
+    value = local.pgid
+  }
 
   depends_on = [portainer_stack.traefik]
 }
@@ -259,7 +400,22 @@ resource "portainer_stack" "jellyfin" {
 
   env {
     name  = "DOMAIN"
-    value = var.apps_domain
+    value = local.domain
+  }
+
+  env {
+    name  = "TZ"
+    value = local.tz
+  }
+
+  env {
+    name  = "PUID"
+    value = local.puid
+  }
+
+  env {
+    name  = "PGID"
+    value = local.pgid
   }
 
   depends_on = [portainer_stack.traefik]
