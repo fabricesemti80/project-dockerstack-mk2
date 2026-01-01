@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  docker-gc:
+    image: docker:cli
+    command: >
+      sh -c "echo '0 23 * * * docker system prune -af' > /etc/crontabs/root && crond -f -l 8"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: 64M
+        reservations:
+          memory: 32M
+      labels:
+        - "homepage.group=Infrastructure"
+        - "homepage.name=Docker GC"
+        - "homepage.icon=docker.png"
+        - "homepage.description=Daily Image Cleanup (23:00)"
