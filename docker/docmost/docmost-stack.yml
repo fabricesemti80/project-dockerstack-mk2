@@ -1,0 +1,79 @@
+version: "3.9"
+
+services:
+  docmost:
+    image: docmost/docmost:latest
+    networks:
+      - proxy
+      - internal
+    environment:
+      - APP_URL=https://doc.${DOMAIN}
+      - APP_SECRET=${DOCMOST_APP_SECRET}
+      - DATABASE_URL=postgresql://docmost:${DOCMOST_POSTGRES_PASSWORD}@db:5432/docmost?schema=public
+      - REDIS_URL=redis://redis:6379
+      - TZ=${TZ}
+    volumes:
+      - type: bind
+        source: /data/homelab/docker-data/docmost/storage
+        target: /app/data/storage
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.proxmox == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=proxy"
+        - "traefik.http.routers.docmost.rule=Host(`doc.${DOMAIN}`)"
+        - "traefik.http.routers.docmost.entrypoints=websecure"
+        - "traefik.http.routers.docmost.tls.certresolver=cloudflare"
+        - "traefik.http.services.docmost.loadbalancer.server.port=3000"
+
+        # Homepage
+        - "homepage.group=bApps"
+        - "homepage.name=Docmost"
+        - "homepage.icon=docmost.png"
+        - "homepage.href=https://doc.${DOMAIN}"
+        - "homepage.description=Knowledge Base"
+
+  db:
+    image: postgres:16-alpine
+    networks:
+      - internal
+    environment:
+      - POSTGRES_DB=docmost
+      - POSTGRES_USER=docmost
+      - POSTGRES_PASSWORD=${DOCMOST_POSTGRES_PASSWORD}
+      - TZ=${TZ}
+    volumes:
+      - type: bind
+        source: /data/homelab/docker-data/docmost/postgres
+        target: /var/lib/postgresql/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.proxmox == true
+
+  redis:
+    image: redis:7.2-alpine
+    networks:
+      - internal
+    volumes:
+      - type: bind
+        source: /data/homelab/docker-data/docmost/redis
+        target: /data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.proxmox == true
+
+networks:
+  proxy:
+    external: true
+  internal:
+    driver: overlay
