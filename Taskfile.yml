@@ -1,0 +1,34 @@
+version: '3'
+
+includes:
+  00_runner:
+    taskfile: ./00_github_runner/Taskfile.yml
+    dir: ./00_github_runner
+    desc: Manage GitHub Self-Hosted Runners
+  
+  01_template:
+    taskfile: ./01_proxmox_template/Taskfile.yml
+    dir: ./01_proxmox_template
+    desc: Create Proxmox VM Templates
+  
+  10_infra_deploy:
+    taskfile: ./10_infra_deployment/Taskfile.yml
+    dir: ./10_infra_deployment
+    desc: Provision Infrastructure (Terraform)
+  
+  11_infra_config:
+    taskfile: ./11_infra_configuration/Taskfile.yml
+    dir: ./11_infra_configuration
+    desc: Configure Infrastructure (Ansible)
+  
+  20_app_deploy:
+    taskfile: ./20_app_deployment/Taskfile.yml
+    dir: ./20_app_deployment
+    desc: Deploy Applications (Terraform/Portainer)
+
+tasks:
+  default:
+    desc: List all tasks
+    cmds:
+      - task --list
+    silent: true

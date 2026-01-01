@@ -108,6 +108,7 @@ flowchart TB
 │   ├── geerlingguy.pip/         # Python pip (Galaxy)
 │   └── fresh_install/           # Custom server setup
 │       ├── defaults/
+│       │   └── main.yml         # Default variables
 │       ├── handlers/
 │       ├── tasks/
 │       │   ├── main.yml
@@ -132,6 +133,72 @@ flowchart TB
 ├── run.sh                       # Alternative run script
 ├── SETUP.md                     # This file
 └── Taskfile.yml                 # Task automation
+```
+
+## Storage Configuration
+
+### LVM Storage Setup
+
+The playbook configures LVM on the secondary disk (30 GB data disk):
+
+| Setting | Value |
+|:---|:---|
+| Volume Group | `data_vg` |
+| Logical Volume | `data_lv` |
+| Size | `80%VG` |
+| Filesystem | `ext4` |
+| Mount Point | `/data` |
+
+#### Created Directory Structure
+
+```
+/data/                          # LVM mount point
+├── homelab/                    # Application data root
+│   └── docker-data/            # Docker persistent volumes
+│       ├── radarr/
+│       ├── sonarr/
+│       ├── bazarr/
+│       ├── sabnzbd/
+│       ├── autobrr/
+│       │   └── postgres/
+│       ├── docmost/
+│       │   ├── storage/
+│       │   ├── postgres/
+│       │   └── redis/
+│       ├── filebrowser/
+│       ├── filerise/
+│       │   ├── users/
+│       │   └── metadata/
+│       ├── jellyfin/
+│       └── jellyfin-cache/
+└── media/                      # NFS mount point (Proxmox only)
+```
+
+### NFS Media Mount (Proxmox VMs Only)
+
+The NFS share is mounted only on Proxmox VMs for media access:
+
+| Setting | Value |
+|:---|:---|
+| NFS Server | `10.0.40.2` |
+| NFS Path | `/media` |
+| Mount Point | `/data/media` |
+| Mount Options | `defaults,soft,intr,rsize=8192,wsize=8192` |
+
+#### NFS Directory Structure
+
+The playbook creates these directories in the NFS mount:
+
+```
+/data/media/                    # NFS mount from 10.0.40.2:/media
+├── torrents/                   # BitTorrent downloads
+│   └── README.md
+├── usenet/                     # Usenet downloads
+│   └── README.md
+├── Movies/                     # Movie library (manual/arr)
+├── TV Shows/                   # TV series library
+├── Music/                      # Music library
+└── Photos/                     # Photo library
 ```
 
 ## Inventory
@@ -187,19 +254,6 @@ The Docker daemon is configured with:
   ]
 }
 ```
-
-### Storage Configuration
-
-| Component | Description |
-|:---|:---|
-| **LVM Storage** | Secondary disk configured as LVM at `/data` |
-| **NFS Mount** | Media share mounted at `/data/media` (Proxmox VMs only) |
-
-**NFS Configuration:**
-- Server: `10.0.40.2`
-- Share: `/media`
-- Mount Point: `/data/media`
-- Applied to: `proxmox_vms` group only
 
 ### Docker Swarm Topology
 
@@ -283,6 +337,26 @@ task apply
 | Portainer Setup | Deploy Portainer with API token |
 | Swarm Init | Initialize Swarm cluster |
 
+## Default Variables
+
+Key variables from `roles/fresh_install/defaults/main.yml`:
+
+| Variable | Default | Description |
+|:---|:---|:---|
+| `install_neovim` | `true` | Install Neovim editor |
+| `install_storage` | `true` | Configure LVM storage |
+| `install_docker` | `true` | Configure Docker |
+| `install_zsh` | `true` | Install ZSH + Oh-My-Zsh |
+| `create_homelab_structure` | `true` | Create directory structure |
+| `install_webmin` | `true` | Install Webmin |
+| `data_mount_point` | `/data` | LVM mount point |
+| `nfs_share_server` | `10.0.40.2` | NFS server IP |
+| `nfs_share_path` | `/media` | NFS export path |
+| `nfs_mount_point` | `/data/media` | Local NFS mount point |
+| `portainer_image_version` | `2.33.6` | Portainer version |
+| `webmin_port` | `10000` | Webmin web interface port |
+| `usermin_port` | `20000` | Usermin web interface port |
+
 ## Using Tags
 
 Run specific parts of the playbook:
@@ -293,6 +367,9 @@ doppler run -- ansible-playbook -i inventory/hosts playbooks/main.yml --tags doc
 
 # Skip Webmin installation
 doppler run -- ansible-playbook -i inventory/hosts playbooks/main.yml --skip-tags webmin
+
+# Only configure storage
+doppler run -- ansible-playbook -i inventory/hosts playbooks/main.yml --tags storage
 ```
 
 ## Post-Configuration
@@ -317,6 +394,22 @@ After playbook completion, you'll see:
 
 **Save the API token in Doppler as `PORTAINER_ACCESS_TOKEN`.**
 
+## Creating Docker Data Directories
+
+Before deploying application stacks, ensure the required directories exist. You can create them manually or run this on Proxmox nodes:
+
+```bash
+# Create all required docker-data directories
+mkdir -p /data/homelab/docker-data/{radarr,sonarr,bazarr,sabnzbd}
+mkdir -p /data/homelab/docker-data/autobrr/postgres
+mkdir -p /data/homelab/docker-data/docmost/{storage,postgres,redis}
+mkdir -p /data/homelab/docker-data/{filebrowser,jellyfin,jellyfin-cache}
+mkdir -p /data/homelab/docker-data/filerise/{users,metadata}
+
+# Set ownership
+chown -R 1000:1000 /data/homelab/docker-data/
+```
+
 ## Troubleshooting
 
 | Issue | Cause | Solution |
@@ -326,6 +419,7 @@ After playbook completion, you'll see:
 | NFS mount fails | Network unreachable | Check VLAN routing from VLAN 30 to 40 |
 | Swarm join fails | Token expired | Re-run swarm setup or manually get token |
 | Portainer not accessible | Firewall blocking | Check Hetzner firewall for port 9443 |
+| LVM creation fails | No secondary disk | Verify disk attached in Proxmox/Hetzner |
 
 ### Manual Swarm Management
 
@@ -353,17 +447,28 @@ tailscale status
 tailscale ping dkr-srv-1
 ```
 
+### Check NFS Mount
+
+```bash
+# On Proxmox nodes
+mount | grep media
+df -h /data/media
+ls -la /data/media
+```
+
 ## Notes
 
 - **Tailscale SSH:** Enabled via `--ssh` flag for emergency access
 - **Docker MTU:** Set to 1280 for Tailscale compatibility
 - **LVM:** Automatically detects largest additional disk
 - **Homelab Structure:** Creates `/data/homelab/` directory structure
+- **NFS:** Only mounted on `proxmox_vms` group, not cloud VMs
 
 ## Next Steps
 
 After configuration:
 
 1. **Save Portainer Token:** Add `PORTAINER_ACCESS_TOKEN` to Doppler
-2. **Deploy Applications:** `cd ../20_app_deployment && task apply`
-3. **Verify Swarm:** `ssh fs@dkr-srv-0 'docker node ls'`
+2. **Create Docker Data Directories:** Run the mkdir commands above
+3. **Deploy Applications:** `cd ../20_app_deployment && task apply`
+4. **Verify Swarm:** `ssh fs@dkr-srv-0 'docker node ls'`

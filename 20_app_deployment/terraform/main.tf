@@ -17,6 +17,18 @@ locals {
   homepage_jellyfin_api   = var.homepage_jellyfin_api
   docmost_app_secret      = var.docmost_app_secret
   docmost_postgres_password = var.docmost_postgres_password
+
+  # Arr Stack
+  autobrr_session_secret    = var.autobrr_session_secret
+  autobrr_postgres_password = var.autobrr_postgres_password
+  radarr_api_key            = var.radarr_api_key
+  sonarr_api_key            = var.sonarr_api_key
+  bazarr_api_key            = var.bazarr_api_key
+  sabnzbd_api_key           = var.sabnzbd_api_key
+
+  # Filemanager Stack
+  filebrowser_admin_password = var.filebrowser_admin_password
+  persistent_tokens_key      = var.persistent_tokens_key
   
   # App Specific
   beszel_last_update      = "2025-12-30T17:45:00Z"
@@ -471,6 +483,120 @@ resource "portainer_stack" "jellyfin" {
   env {
     name  = "JELLYFIN_API_KEY"
     value = local.homepage_jellyfin_api
+  }
+
+  depends_on = [portainer_stack.traefik]
+}
+
+# resource "portainer_stack" "arr" {
+#   endpoint_id               = var.endpoint_id
+#   name                      = "arr"
+#   method                    = "repository"
+#   deployment_type           = "swarm"
+#   repository_url            = var.repository_url
+#   repository_reference_name = var.repository_branch
+#   file_path_in_repository   = "docker/arr/arr-stack.yml"
+#   force_update              = true
+#   pull_image                = true
+#   prune                     = true
+#   update_interval           = "5m"
+#   stack_webhook             = true
+
+#   env {
+#     name  = "DOMAIN"
+#     value = local.domain
+#   }
+
+#   env {
+#     name  = "TZ"
+#     value = local.tz
+#   }
+
+#   env {
+#     name  = "PUID"
+#     value = local.puid
+#   }
+
+#   env {
+#     name  = "PGID"
+#     value = local.pgid
+#   }
+
+#   env {
+#     name  = "AUTOBRR_SESSION_SECRET"
+#     value = local.autobrr_session_secret
+#   }
+
+#   env {
+#     name  = "AUTOBRR_POSTGRES_PASSWORD"
+#     value = local.autobrr_postgres_password
+#   }
+
+#   env {
+#     name  = "RADARR_API_KEY"
+#     value = local.radarr_api_key
+#   }
+
+#   env {
+#     name  = "SONARR_API_KEY"
+#     value = local.sonarr_api_key
+#   }
+
+#   env {
+#     name  = "BAZARR_API_KEY"
+#     value = local.bazarr_api_key
+#   }
+
+#   env {
+#     name  = "SABNZBD_API_KEY"
+#     value = local.sabnzbd_api_key
+#   }
+
+#   depends_on = [portainer_stack.traefik]
+# }
+
+resource "portainer_stack" "filemanager" {
+  endpoint_id               = var.endpoint_id
+  name                      = "filemanager"
+  method                    = "repository"
+  deployment_type           = "swarm"
+  repository_url            = var.repository_url
+  repository_reference_name = var.repository_branch
+  file_path_in_repository   = "docker/filemanager/filemanager-stack.yml"
+  force_update              = true
+  pull_image                = true
+  prune                     = true
+  update_interval           = "5m"
+  stack_webhook             = true
+
+  env {
+    name  = "DOMAIN"
+    value = local.domain
+  }
+
+  env {
+    name  = "TZ"
+    value = local.tz
+  }
+
+  env {
+    name  = "PUID"
+    value = local.puid
+  }
+
+  env {
+    name  = "PGID"
+    value = local.pgid
+  }
+
+  env {
+    name  = "FILEBROWSER_ADMIN_PASSWORD"
+    value = local.filebrowser_admin_password
+  }
+
+  env {
+    name  = "PERSISTENT_TOKENS_KEY"
+    value = local.persistent_tokens_key
   }
 
   depends_on = [portainer_stack.traefik]

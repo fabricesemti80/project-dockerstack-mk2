@@ -11,342 +11,46 @@ variable "portainer_access_token" {
 }
 
 variable "endpoint_id" {
-
   type        = number
-
   description = "The ID of the Portainer endpoint (environment)"
-
   default     = 1
-
 }
-
-
 
 variable "cloudflare_api_token" {
-
-
-
   type        = string
-
-
-
   description = "Cloudflare API Token for DNS-01 challenges"
-
-
-
   sensitive   = true
-
-
-
 }
-
-
-
-
-
-
 
 variable "acme_email" {
-
   type        = string
-
   description = "Email address for Let's Encrypt"
-
 }
-
-
 
 variable "apps_domain" {
-
-
-
   type        = string
-
-
-
   description = "The base domain for applications"
-
-
-
 }
-
-
-
-
-
-
 
 variable "cloudflare_tunnel_token" {
-
-
-
-
-
-
-
   type        = string
-
-
-
-
-
-
-
   description = "Cloudflare Tunnel Token"
-
-
-
-
-
-
-
   sensitive   = true
-
-
-
-
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 variable "beszel_agent_key" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   type        = string
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   description = "Beszel Agent Public Key (from Hub)"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   sensitive   = true
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   default     = ""
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 variable "beszel_agent_token" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   type        = string
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   description = "Beszel Agent Token (for push mode)"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   sensitive   = true
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   default     = ""
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 variable "homepage_jellyfin_api" {
   type        = string
@@ -369,72 +73,72 @@ variable "docmost_postgres_password" {
   default     = ""
 }
 
-variable "repository_url" {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Arr Stack Variables
+variable "autobrr_session_secret" {
   type        = string
-
-
-
-  description = "The Git repository URL"
-
-
-
-  default     = "https://github.com/fabricesemti80/project-dockerstack-mk2.git"
-
-
-
+  description = "Autobrr Session Secret"
+  sensitive   = true
+  default     = ""
 }
 
+variable "autobrr_postgres_password" {
+  type        = string
+  description = "Autobrr Postgres Password"
+  sensitive   = true
+  default     = ""
+}
 
+variable "radarr_api_key" {
+  type        = string
+  description = "Radarr API Key"
+  sensitive   = true
+  default     = ""
+}
 
+variable "sonarr_api_key" {
+  type        = string
+  description = "Sonarr API Key"
+  sensitive   = true
+  default     = ""
+}
 
+variable "bazarr_api_key" {
+  type        = string
+  description = "Bazarr API Key"
+  sensitive   = true
+  default     = ""
+}
 
+variable "sabnzbd_api_key" {
+  type        = string
+  description = "SABnzbd API Key"
+  sensitive   = true
+  default     = ""
+}
 
+# Filemanager Stack Variables
+variable "filebrowser_admin_password" {
+  type        = string
+  description = "Filebrowser Admin Password"
+  sensitive   = true
+  default     = ""
+}
+
+variable "persistent_tokens_key" {
+  type        = string
+  description = "Filerise Persistent Tokens Key"
+  sensitive   = true
+  default     = ""
+}
+
+variable "repository_url" {
+  type        = string
+  description = "The Git repository URL"
+  default     = "https://github.com/fabricesemti80/project-dockerstack-mk2.git"
+}
 
 variable "repository_branch" {
-
-
-
   type        = string
-
-
-
   description = "The Git branch to use"
-
-
-
   default     = "refs/heads/main"
-
-
-
 }

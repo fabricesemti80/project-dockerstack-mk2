@@ -36,11 +36,20 @@ flowchart TB
 
     subgraph "Application Layer"
         subgraph "Docker Swarm Cluster"
+            SP["Socket Proxy"]
             TRF["Traefik<br/>Ingress Controller"]
             PTN["Portainer<br/>Container Management"]
             CFD["Cloudflared<br/>Tunnel Connector"]
             BZL["Beszel<br/>Monitoring"]
-            APP["Application Stacks"]
+            HP["Homepage<br/>Dashboard"]
+            subgraph "Media Stack"
+                JF["Jellyfin"]
+            end
+            subgraph "Utilities"
+                DM["Docmost"]
+                FM["Filebrowser"]
+                GC["Docker GC"]
+            end
         end
     end
 
@@ -69,10 +78,14 @@ flowchart TB
     DKR2 <--> TS
     DKR3 <--> TS
     
-    DKR0 --> TRF
+    DKR0 --> SP
+    SP --> TRF
     TRF --> PTN
     TRF --> BZL
-    TRF --> APP
+    TRF --> HP
+    TRF --> JF
+    TRF --> DM
+    TRF --> FM
     CFD --> TRF
     
     CF --> CFD
@@ -88,13 +101,17 @@ flowchart TB
     classDef proxmox fill:#e65100,stroke:#fff,color:#fff
     classDef network fill:#34a853,stroke:#fff,color:#fff
     classDef app fill:#9c27b0,stroke:#fff,color:#fff
-    classDef external fill:#607d8b,stroke:#fff,color:#fff
+    classDef media fill:#00a4dc,stroke:#fff,color:#fff
+    classDef util fill:#607d8b,stroke:#fff,color:#fff
+    classDef external fill:#455a64,stroke:#fff,color:#fff
     classDef cicd fill:#f9a825,stroke:#000,color:#000
 
     class DKR0 cloud
     class PVE0,PVE1,PVE2,DKR1,DKR2,DKR3,NFS proxmox
     class TS,CF,CFZ network
-    class TRF,PTN,CFD,BZL,APP app
+    class SP,TRF,PTN,CFD,BZL,HP app
+    class JF media
+    class DM,FM,GC util
     class USR,LE external
     class GH,GHR,DOP cicd
 ```
@@ -240,9 +257,19 @@ project-dockerstack-mk2/
 │   └── Taskfile.yml         # Task automation
 │
 ├── docker/                  # Docker stack definitions
-│   ├── traefik/             # Traefik ingress controller
+│   ├── arr/                 # Media automation (Radarr, Sonarr, etc.)
+│   ├── beszel/              # Server monitoring
 │   ├── cloudflared/         # Cloudflare tunnel connector
-│   └── beszel/              # Server monitoring
+│   ├── docker-gc/           # Docker garbage collection
+│   ├── docmost/             # Documentation platform
+│   ├── filemanager/         # Web file managers
+│   ├── glance/              # Dashboard
+│   ├── homepage/            # Application dashboard
+│   ├── jellyfin/            # Media server
+│   ├── socket-proxy/        # Docker socket proxy
+│   └── traefik/             # Ingress controller
+│
+├── hack/                    # Utility scripts
 │
 └── .github/
     └── workflows/           # GitHub Actions workflows
@@ -306,18 +333,48 @@ Server configuration using Ansible roles:
 - Webmin/Usermin setup
 - SSH banner configuration
 
+**Storage Structure Created:**
+
+```
+/data/                          # LVM mount point
+├── homelab/
+│   └── docker-data/            # Docker persistent volumes
+│       ├── radarr/
+│       ├── sonarr/
+│       ├── bazarr/
+│       ├── sabnzbd/
+│       ├── autobrr/
+│       ├── docmost/
+│       ├── filebrowser/
+│       ├── filerise/
+│       ├── jellyfin/
+│       └── jellyfin-cache/
+└── media/                      # NFS mount (Proxmox only)
+    ├── torrents/
+    ├── usenet/
+    ├── Movies/
+    ├── TV Shows/
+    └── Music/
+```
+
 - **[Setup Guide](11_infra_configuration/SETUP.md)**
 
 ### 5. Application Deployment (`20_app_deployment/`)
 
 Docker stack deployment via Terraform and Portainer GitOps:
 
-| Stack | Description |
-|-------|-------------|
-| `traefik` | Ingress controller with Let's Encrypt SSL |
-| `whoami` | Test service for load balancing verification |
-| `cloudflared` | Cloudflare tunnel connector |
-| `beszel` | Lightweight server monitoring |
+| Stack | Description | Placement |
+|-------|-------------|-----------|
+| `socket-proxy` | Docker API proxy | Cloud leader |
+| `traefik` | Ingress controller with Let's Encrypt SSL | Cloud leader |
+| `whoami` | Test service for load balancing verification | Any manager |
+| `cloudflared` | Cloudflare tunnel connector | Managers |
+| `docker-gc` | Daily Docker cleanup | All nodes |
+| `beszel` | Server monitoring (Hub + Agent) | Hub: leader, Agent: all |
+| `homepage` | Application dashboard | Cloud leader |
+| `jellyfin` | Media server | Proxmox nodes |
+| `docmost` | Documentation platform | Proxmox nodes |
+| `filemanager` | Web file managers (Filebrowser, Filerise) | Proxmox nodes |
 
 - **[Setup Guide](20_app_deployment/SETUP.md)**
 
@@ -328,8 +385,16 @@ Docker Compose/Swarm stack definitions:
 | Stack | Description | Setup Guide |
 |-------|-------------|-------------|
 | [Traefik](docker/traefik/) | Reverse proxy with automatic SSL | [Setup](docker/traefik/setup.md) |
+| [Socket Proxy](docker/socket-proxy/) | Secure Docker API access | [Setup](docker/socket-proxy/setup.md) |
 | [Cloudflared](docker/cloudflared/) | Cloudflare tunnel connector | [Setup](docker/cloudflared/setup.md) |
 | [Beszel](docker/beszel/) | Server monitoring with Hub-Agent architecture | [Setup](docker/beszel/setup.md) |
+| [Homepage](docker/homepage/) | Modern application dashboard | [Setup](docker/homepage/setup.md) |
+| [Jellyfin](docker/jellyfin/) | Media server | [Setup](docker/jellyfin/setup.md) |
+| [Docmost](docker/docmost/) | Documentation and knowledge base | [Setup](docker/docmost/setup.md) |
+| [Filemanager](docker/filemanager/) | Web file managers | [Setup](docker/filemanager/setup.md) |
+| [Docker GC](docker/docker-gc/) | Automated Docker cleanup | [Setup](docker/docker-gc/setup.md) |
+| [Glance](docker/glance/) | Customizable dashboard | [Setup](docker/glance/setup.md) |
+| [Arr Stack](docker/arr/) | Media automation (Radarr, Sonarr, etc.) | [Setup](docker/arr/setup.md) |
 
 ## Secrets Management (Doppler)
 
@@ -369,6 +434,23 @@ All secrets are managed via [Doppler](https://www.doppler.com/). The following t
 | `PORTAINER_ACCESS_TOKEN` | Portainer API token | Apps |
 | `TAILSCALE_AUTH_KEY` | Tailscale authentication key | Configuration |
 | `BESZEL_AGENT_KEY` | Beszel agent public key | Apps |
+| `BESZEL_AGENT_TOKEN` | Beszel agent token | Apps |
+| `JELLYFIN_API_KEY` | Jellyfin API key | Apps (Homepage widget) |
+| `DOCMOST_APP_SECRET` | Docmost application secret | Apps |
+| `DOCMOST_POSTGRES_PASSWORD` | Docmost PostgreSQL password | Apps |
+| `FILEBROWSER_ADMIN_PASSWORD` | Filebrowser admin password | Apps |
+| `PERSISTENT_TOKENS_KEY` | Filerise token key | Apps |
+
+### Arr Stack Secrets (Optional)
+
+| Secret | Description |
+|--------|-------------|
+| `AUTOBRR_SESSION_SECRET` | Autobrr session secret |
+| `AUTOBRR_POSTGRES_PASSWORD` | Autobrr PostgreSQL password |
+| `RADARR_API_KEY` | Radarr API key |
+| `SONARR_API_KEY` | Sonarr API key |
+| `BAZARR_API_KEY` | Bazarr API key |
+| `SABNZBD_API_KEY` | SABnzbd API key |
 
 ### GitHub Actions Secrets
 
@@ -392,6 +474,7 @@ All secrets are managed via [Doppler](https://www.doppler.com/). The following t
 | Network | Type | Subnet | Purpose |
 |---------|------|--------|---------|
 | `proxy` | Overlay | 10.0.100.0/24 | Traefik ingress |
+| `socket_proxy` | Overlay | 10.0.200.0/24 | Docker API access |
 
 ### DNS Configuration
 
@@ -421,6 +504,19 @@ All services are accessible via `*.yourdomain.com` through Cloudflare Tunnel:
 | Template | Debian 13 (ID: 9008) |
 | Network | VLAN 30 |
 
+## Deployed Services
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| Traefik | `https://traefik.<domain>` | Ingress dashboard |
+| Portainer | `https://<ip>:9443` | Container management |
+| Homepage | `https://home.<domain>` | Application dashboard |
+| Beszel | `https://beszel.<domain>` | Server monitoring |
+| Jellyfin | `https://jellyfin.<domain>` | Media server |
+| Docmost | `https://doc.<domain>` | Documentation |
+| Filebrowser | `https://file.<domain>` | File manager |
+| Filerise | `https://rise.<domain>` | Photo/file manager |
+
 ## CI/CD Workflows
 
 ### Proxmox Template Workflow
@@ -443,6 +539,8 @@ The workflow runs Ansible inside a Docker container (`willhallonline/ansible`) f
 | Beszel agent not connecting | Mismatched agent key | Verify `BESZEL_AGENT_KEY` matches Hub's public key |
 | Terraform state conflicts | Local state file | Do not run infra deployment from multiple locations |
 | SSH connection refused | Tailscale not ready | Wait for Tailscale to connect, check `tailscale status` |
+| NFS mount fails | Network unreachable | Check VLAN routing from VLAN 30 to 40 |
+| Stack fails to deploy | Missing directories | Create required directories on hosts |
 
 ### Useful Commands
 
@@ -453,11 +551,20 @@ tailscale status
 # View Docker Swarm nodes
 docker node ls
 
+# List all stacks
+docker stack ls
+
 # Check Traefik logs
 docker service logs traefik_traefik
 
 # Verify tunnel connectivity
 docker service logs cloudflared_cloudflared
+
+# Check NFS mount
+mount | grep media
+
+# View service status
+docker service ps <service_name>
 ```
 
 ## External Resources
@@ -470,6 +577,8 @@ docker service logs cloudflared_cloudflared
 - [Tailscale Documentation](https://tailscale.com/kb/)
 - [Cloudflare Zero Trust](https://developers.cloudflare.com/cloudflare-one/)
 - [Beszel Documentation](https://www.beszel.dev/)
+- [Jellyfin Documentation](https://jellyfin.org/docs/)
+- [Homepage Documentation](https://gethomepage.dev/)
 - [Hetzner Cloud API](https://docs.hetzner.cloud/)
 - [Proxmox VE Documentation](https://pve.proxmox.com/pve-docs/)
 

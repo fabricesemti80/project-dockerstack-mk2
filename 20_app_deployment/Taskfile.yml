@@ -29,6 +29,14 @@ tasks:
           export TF_VAR_homepage_jellyfin_api="$HOMEPAGE_JELLYFIN_API"
           export TF_VAR_docmost_app_secret="$DOCMOST_APP_SECRET"
           export TF_VAR_docmost_postgres_password="$DOCMOST_POSTGRES_PASSWORD"
+          export TF_VAR_autobrr_session_secret="$AUTOBRR_SESSION_SECRET"
+          export TF_VAR_autobrr_postgres_password="$AUTOBRR_POSTGRES_PASSWORD"
+          export TF_VAR_radarr_api_key="$RADARR_API_KEY"
+          export TF_VAR_sonarr_api_key="$SONARR_API_KEY"
+          export TF_VAR_bazarr_api_key="$BAZARR_API_KEY"
+          export TF_VAR_sabnzbd_api_key="$SABNZBD_API_KEY"
+          export TF_VAR_filebrowser_admin_password="$FILEBROWSER_ADMIN_PASSWORD"
+          export TF_VAR_persistent_tokens_key="$PERSISTENT_TOKENS_KEY"
           terraform plan
         '
 
@@ -48,6 +56,14 @@ tasks:
           export TF_VAR_homepage_jellyfin_api="$HOMEPAGE_JELLYFIN_API"
           export TF_VAR_docmost_app_secret="$DOCMOST_APP_SECRET"
           export TF_VAR_docmost_postgres_password="$DOCMOST_POSTGRES_PASSWORD"
+          export TF_VAR_autobrr_session_secret="$AUTOBRR_SESSION_SECRET"
+          export TF_VAR_autobrr_postgres_password="$AUTOBRR_POSTGRES_PASSWORD"
+          export TF_VAR_radarr_api_key="$RADARR_API_KEY"
+          export TF_VAR_sonarr_api_key="$SONARR_API_KEY"
+          export TF_VAR_bazarr_api_key="$BAZARR_API_KEY"
+          export TF_VAR_sabnzbd_api_key="$SABNZBD_API_KEY"
+          export TF_VAR_filebrowser_admin_password="$FILEBROWSER_ADMIN_PASSWORD"
+          export TF_VAR_persistent_tokens_key="$PERSISTENT_TOKENS_KEY"
           terraform apply -auto-approve
         '
 
@@ -67,5 +83,13 @@ tasks:
           export TF_VAR_homepage_jellyfin_api="$HOMEPAGE_JELLYFIN_API"
           export TF_VAR_docmost_app_secret="$DOCMOST_APP_SECRET"
           export TF_VAR_docmost_postgres_password="$DOCMOST_POSTGRES_PASSWORD"
+          export TF_VAR_autobrr_session_secret="$AUTOBRR_SESSION_SECRET"
+          export TF_VAR_autobrr_postgres_password="$AUTOBRR_POSTGRES_PASSWORD"
+          export TF_VAR_radarr_api_key="$RADARR_API_KEY"
+          export TF_VAR_sonarr_api_key="$SONARR_API_KEY"
+          export TF_VAR_bazarr_api_key="$BAZARR_API_KEY"
+          export TF_VAR_sabnzbd_api_key="$SABNZBD_API_KEY"
+          export TF_VAR_filebrowser_admin_password="$FILEBROWSER_ADMIN_PASSWORD"
+          export TF_VAR_persistent_tokens_key="$PERSISTENT_TOKENS_KEY"
           terraform destroy -auto-approve
         '
