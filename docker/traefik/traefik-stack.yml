@@ -25,7 +25,7 @@ services:
       - "--providers.swarm=true"
       - "--providers.swarm.exposedbydefault=false"
       - "--providers.swarm.network=proxy"
-      - "--providers.swarm.endpoint=tcp://socket-proxy:2375"
+      - "--providers.swarm.endpoint=tcp://socket-proxy_socket-proxy:2375"
 
       # EntryPoints
       - "--entrypoints.web.address=:80"
@@ -84,7 +84,7 @@ services:
   logrotate:
     image: vegardit/traefik-logrotate:latest
     environment:
-      DOCKER_HOST: tcp://socket-proxy:2375
+      DOCKER_HOST: tcp://socket-proxy_socket-proxy:2375
       LOGROTATE_LOGS: /var/log/traefik/*.log
       LOGROTATE_TRIGGER_INTERVAL: daily
       LOGROTATE_TRIGGER_SIZE: 50M

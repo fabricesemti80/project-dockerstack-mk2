@@ -1,5 +1,5 @@
 # Docker Swarm Discovery Configuration
 my-docker:
-  host: traefik_socket-proxy
+  host: socket-proxy_socket-proxy
   port: 2375
   swarm: true
