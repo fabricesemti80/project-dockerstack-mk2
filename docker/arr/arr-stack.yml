@@ -1,0 +1,214 @@
+version: "3.9"
+
+services:
+  radarr:
+    image: ghcr.io/hotio/radarr:release-5.26.2.10099
+    networks:
+      - proxy
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - type: bind
+        source: /data/homelab/docker-data/radarr
+        target: /config
+      - type: bind
+        source: /data/media
+        target: /data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.proxmox == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=proxy"
+        - "traefik.http.routers.radarr.rule=Host(`radarr.${DOMAIN}`)"
+        - "traefik.http.routers.radarr.entrypoints=websecure"
+        - "traefik.http.routers.radarr.tls.certresolver=cloudflare"
+        - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+        # Homepage
+        - "homepage.group=Media"
+        - "homepage.name=Radarr"
+        - "homepage.icon=radarr.png"
+        - "homepage.href=https://radarr.${DOMAIN}"
+        - "homepage.description=Movie Manager"
+        - "homepage.widget.type=radarr"
+        - "homepage.widget.url=http://radarr:7878"
+        - "homepage.widget.key=${RADARR_API_KEY}"
+
+  sonarr:
+    image: ghcr.io/hotio/sonarr:release-4.0.15.2941
+    networks:
+      - proxy
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - type: bind
+        source: /data/homelab/docker-data/sonarr
+        target: /config
+      - type: bind
+        source: /data/media
+        target: /data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.proxmox == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=proxy"
+        - "traefik.http.routers.sonarr.rule=Host(`sonarr.${DOMAIN}`)"
+        - "traefik.http.routers.sonarr.entrypoints=websecure"
+        - "traefik.http.routers.sonarr.tls.certresolver=cloudflare"
+        - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+        # Homepage
+        - "homepage.group=Media"
+        - "homepage.name=Sonarr"
+        - "homepage.icon=sonarr.png"
+        - "homepage.href=https://sonarr.${DOMAIN}"
+        - "homepage.description=TV Series Manager"
+        - "homepage.widget.type=sonarr"
+        - "homepage.widget.url=http://sonarr:8989"
+        - "homepage.widget.key=${SONARR_API_KEY}"
+
+  bazarr:
+    image: ghcr.io/hotio/bazarr:release-1.5.2
+    networks:
+      - proxy
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - type: bind
+        source: /data/homelab/docker-data/bazarr
+        target: /config
+      - type: bind
+        source: /data/media
+        target: /data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.proxmox == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=proxy"
+        - "traefik.http.routers.bazarr.rule=Host(`bazarr.${DOMAIN}`)"
+        - "traefik.http.routers.bazarr.entrypoints=websecure"
+        - "traefik.http.routers.bazarr.tls.certresolver=cloudflare"
+        - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
+        # Homepage
+        - "homepage.group=Media"
+        - "homepage.name=Bazarr"
+        - "homepage.icon=bazarr.png"
+        - "homepage.href=https://bazarr.${DOMAIN}"
+        - "homepage.description=Subtitle Manager"
+        - "homepage.widget.type=bazarr"
+        - "homepage.widget.url=http://bazarr:6767"
+        - "homepage.widget.key=${BAZARR_API_KEY}"
+
+  sabnzbd:
+    image: ghcr.io/hotio/sabnzbd:release-4.5.2
+    networks:
+      - proxy
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - SABNZBD__host_whitelist=sabnzbd,sabnzbd.${DOMAIN},localhost,127.0.0.1
+    volumes:
+      - type: bind
+        source: /data/homelab/docker-data/sabnzbd
+        target: /config
+      - type: bind
+        source: /data/media
+        target: /data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.proxmox == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=proxy"
+        - "traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.${DOMAIN}`)"
+        - "traefik.http.routers.sabnzbd.entrypoints=websecure"
+        - "traefik.http.routers.sabnzbd.tls.certresolver=cloudflare"
+        - "traefik.http.services.sabnzbd.loadbalancer.server.port=8080"
+        # Homepage
+        - "homepage.group=Media"
+        - "homepage.name=SABnzbd"
+        - "homepage.icon=sabnzbd.png"
+        - "homepage.href=https://sabnzbd.${DOMAIN}"
+        - "homepage.description=NZB Downloader"
+        - "homepage.widget.type=sabnzbd"
+        - "homepage.widget.url=http://sabnzbd:8080"
+        - "homepage.widget.key=${SABNZBD_API_KEY}"
+
+  autobrr:
+    image: ghcr.io/autobrr/autobrr:v1.65.0
+    networks:
+      - proxy
+      - internal
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - AUTOBRR__SESSION_SECRET=${AUTOBRR_SESSION_SECRET}
+      - AUTOBRR__POSTGRES_PASSWORD=${AUTOBRR_POSTGRES_PASSWORD}
+    volumes:
+      - type: bind
+        source: /data/homelab/docker-data/autobrr
+        target: /config
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.proxmox == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=proxy"
+        - "traefik.http.routers.autobrr.rule=Host(`autobrr.${DOMAIN}`)"
+        - "traefik.http.routers.autobrr.entrypoints=websecure"
+        - "traefik.http.routers.autobrr.tls.certresolver=cloudflare"
+        - "traefik.http.services.autobrr.loadbalancer.server.port=7474"
+        # Homepage
+        - "homepage.group=Media"
+        - "homepage.name=Autobrr"
+        - "homepage.icon=autobrr.png"
+        - "homepage.href=https://autobrr.${DOMAIN}"
+        - "homepage.description=Download Automator"
+
+  autobrr-postgres:
+    image: postgres:16
+    networks:
+      - internal
+    environment:
+      - POSTGRES_PASSWORD=${AUTOBRR_POSTGRES_PASSWORD}
+      - TZ=${TZ}
+    volumes:
+      - type: bind
+        source: /data/homelab/docker-data/autobrr/postgres
+        target: /var/lib/postgresql/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.proxmox == true
+
+networks:
+  proxy:
+    external: true
+  internal:
+    driver: overlay

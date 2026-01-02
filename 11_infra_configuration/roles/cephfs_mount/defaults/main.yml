@@ -25,3 +25,12 @@ cephfs_docker_data_dirs:
   - docmost/postgres
   - docmost/storage
   - docmost/redis
+  - radarr
+  - sonarr
+  - bazarr
+  - sabnzbd
+  - autobrr
+  - autobrr/postgres
+  - filebrowser
+  - filerise/metadata
+  - filerise/users

@@ -185,6 +185,34 @@ task apply
 task output
 ```
 
+## GPU Passthrough (Intel iGPU)
+
+The Proxmox VMs (`dkr-srv-1`, `dkr-srv-2`, `dkr-srv-3`) are configured with Intel iGPU passthrough using Proxmox **Resource Mappings**.
+
+### Requirements
+
+1.  **Proxmox Resource Mapping**:
+    *   A PCI resource mapping named `iGPU` must be created in the Proxmox Datacenter.
+    *   This mapping must include the device `0000:00:02.0` on all three nodes (`pve-0`, `pve-1`, `pve-2`).
+    *   The `terraform@pve` user must have `Mapping.Use` permissions on this resource.
+
+2.  **VM Reboot**:
+    *   When Terraform adds or modifies the `hostpci` configuration, the Proxmox API will flag the VM for a reboot.
+    *   Since `reboot_after_update` is disabled to prevent unexpected downtime, you must **manually reboot the VMs** to apply the hardware changes.
+
+### Configuration (Terraform)
+
+```hcl
+pci_devices = [
+  {
+    mapping = "iGPU"
+    pcie    = false
+    rombar  = true
+    xvga    = true
+  }
+]
+```
+
 ## Firewall Rules (Hetzner)
 
 | Port | Protocol | Purpose |

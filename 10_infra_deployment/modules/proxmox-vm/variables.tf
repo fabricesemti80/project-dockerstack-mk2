@@ -156,11 +156,12 @@ variable "tpm_state_enabled" {
 variable "pci_devices" {
   description = "List of PCI devices to pass through"
   type = list(object({
-    device  = string
-    mapping = string
-    pcie    = bool
-    mdev    = string
-    rombar  = bool
+    id      = optional(string)
+    mapping = optional(string)
+    pcie    = optional(bool, false)
+    mdev    = optional(string)
+    rombar  = optional(bool, true)
+    xvga    = optional(bool, false)
   }))
   default = []
 }

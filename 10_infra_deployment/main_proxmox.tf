@@ -152,12 +152,7 @@ locals {
     dns_servers                 = local.vm_common.dns_servers
     ipv4_address                = local.dkr_srv_1.ipv4_address
     ipv4_gateway                = local.dkr_srv_1.ipv4_gateway
-  
-    # VM Lifecycle Settings
-    on_boot             = local.vm_common.on_boot
-    reboot_after_update = local.vm_common.reboot_after_update
-    started             = local.vm_common.started
-  
+
     # EFI and TPM
     efi_disk_enabled  = local.vm_common.efi_disk_enabled
     tpm_state_enabled = local.vm_common.tpm_state_enabled
@@ -293,12 +288,7 @@ locals {
     dns_servers                 = local.vm_common.dns_servers
     ipv4_address                = local.dkr_srv_3.ipv4_address
     ipv4_gateway                = local.dkr_srv_3.ipv4_gateway
-  
-    # VM Lifecycle Settings
-    on_boot             = local.vm_common.on_boot
-    reboot_after_update = local.vm_common.reboot_after_update
-    started             = local.vm_common.started
-  
+
     # EFI and TPM
     efi_disk_enabled  = local.vm_common.efi_disk_enabled
     tpm_state_enabled = local.vm_common.tpm_state_enabled

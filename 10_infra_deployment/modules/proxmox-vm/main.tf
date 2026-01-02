@@ -102,11 +102,13 @@ resource "proxmox_virtual_environment_vm" "vm" {
   dynamic "hostpci" {
     for_each = var.pci_devices
     content {
-      device  = hostpci.value.device
+      device  = "hostpci${hostpci.key}"
+      id      = hostpci.value.id
       mapping = hostpci.value.mapping
       pcie    = hostpci.value.pcie
       mdev    = hostpci.value.mdev
       rombar  = hostpci.value.rombar
+      xvga    = hostpci.value.xvga
     }
   }
 

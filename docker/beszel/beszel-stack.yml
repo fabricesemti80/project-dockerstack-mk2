@@ -28,6 +28,13 @@ services:
         - "traefik.http.routers.beszel.entrypoints=websecure"
         - "traefik.http.routers.beszel.tls.certresolver=cloudflare"
         - "traefik.http.services.beszel.loadbalancer.server.port=8090"
+        
+        # Homepage Dashboard
+        - "homepage.group=Monitoring"
+        - "homepage.name=Beszel"
+        - "homepage.icon=beszel.png"
+        - "homepage.href=https://beszel.${DOMAIN}"
+        - "homepage.description=Lightweight server monitoring"
 
   beszel-agent:
     image: henrygd/beszel-agent:latest

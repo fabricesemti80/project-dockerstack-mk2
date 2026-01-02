@@ -125,3 +125,17 @@
     mode: '0755'
   loop: "{{ cephfs_docker_data_dirs }}"
   tags: [cephfs, create_dirs, storage]
+
+- name: Set ownership for Postgres directories (Docmost/Autobrr)
+  # UID/GID 70 is the standard for the 'postgres' user in Alpine/Debian Docker images
+  ansible.builtin.file:
+    path: "{{ cephfs_mount_point }}/docker-data/{{ item }}"
+    state: directory
+    owner: 70
+    group: 70
+    mode: '0700'
+  loop:
+    - docmost/postgres
+    - autobrr/postgres
+  when: item in cephfs_docker_data_dirs
+  tags: [cephfs, create_dirs, storage, fix_perms]
