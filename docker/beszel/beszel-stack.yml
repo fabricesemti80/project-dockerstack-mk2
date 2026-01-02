@@ -30,7 +30,7 @@ services:
         - "traefik.http.services.beszel.loadbalancer.server.port=8090"
         
         # Homepage Dashboard
-        - "homepage.group=Monitoring"
+        - "homepage.group=Infrastructure"
         - "homepage.name=Beszel"
         - "homepage.icon=beszel.png"
         - "homepage.href=https://beszel.${DOMAIN}"
